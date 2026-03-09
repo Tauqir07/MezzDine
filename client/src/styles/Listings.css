@@ -1,0 +1,314 @@
+body {
+  background: #f5f5f5;
+}
+
+.list-container {
+  background: white;
+  padding: 40px 20px;
+  border-radius: 10px;
+  max-width: 1200px;
+  margin: 40px auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+
+.page-title {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  text-decoration: none;
+  color: black;
+  border: 1px solid #eee;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.card-image {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.card:hover .card-image {
+  transform: scale(1.05);
+}
+
+
+.card-content {
+  padding: 15px;
+}
+
+.price {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.address {
+  font-size: 14px;
+  color: gray;
+}
+.filter-bar {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.filter-bar input {
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  min-width: 180px;
+  flex: 1;
+}
+
+/* Improve card design */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  transition: 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+}
+
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.card-content {
+  padding: 15px;
+}
+
+.price {
+  font-weight: bold;
+  color: #e23744;
+}
+
+.address {
+  color: #666;
+  font-size: 14px;
+}
+.search-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.filter-button {
+  padding: 12px 20px;
+  border-radius: 8px;
+  background: #e23744;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.filter-panel {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  margin-bottom: 25px;
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.filter-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.filter-modal {
+  background: white;
+  width: 500px;
+  max-width: 95%;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.price-inputs {
+  display: flex;
+  gap: 10px;
+}
+
+.filter-section input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  width: 100%;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: #e23744;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.apply-btn {
+  background: #e23744;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+input[type="range"] {
+  width: 100%;
+  accent-color: #e23744;
+}
+.counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.counter button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+}
+.amenities-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.amenity {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.amenity.active {
+  background: #e23744;
+  color: white;
+  border-color: #e23744;
+}
+.search-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 40px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 700px;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+}
+
+.search-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.filter-trigger {
+  background: #e23744;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.filter-trigger:hover {
+  background: #c62836;
+}
+.price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.price-inputs input {
+  width: 100px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #e23744;
+}

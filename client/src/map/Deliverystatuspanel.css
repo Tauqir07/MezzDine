@@ -1,0 +1,122 @@
+.dsp-wrap {
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 24px;
+}
+
+.dsp-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 6px;
+}
+
+.dsp-sub {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 18px;
+}
+
+/* Steps row */
+.dsp-steps {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.dsp-step {
+  flex: 1 1 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  position: relative;
+  opacity: 0.6;
+}
+
+.dsp-step:hover:not(:disabled) {
+  border-color: #1a1a1a;
+  opacity: 1;
+}
+
+.dsp-step--done {
+  border-color: #16a34a;
+  background: #f0fdf4;
+  opacity: 1;
+}
+
+.dsp-step--active {
+  border-color: #1a1a1a;
+  background: #1a1a1a;
+  color: #fff;
+  opacity: 1;
+}
+
+.dsp-step-icon  { font-size: 22px; }
+.dsp-step-label { font-size: 12px; font-weight: 700; text-align: center; }
+
+/* active indicator dot */
+.dsp-step-dot {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+/* note row */
+.dsp-note-row {
+  display: flex;
+  gap: 8px;
+}
+
+.dsp-note-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: 0.2s;
+}
+.dsp-note-input:focus { border-color: #1a1a1a; }
+
+.dsp-note-btn {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.dsp-note-btn:hover:not(:disabled) { background: #333; }
+.dsp-note-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+.dsp-saved {
+  font-size: 13px;
+  color: #16a34a;
+  font-weight: 700;
+  margin: 10px 0 0;
+  animation: dsp-fade 0.3s ease;
+}
+@keyframes dsp-fade {
+  from { opacity: 0; } to { opacity: 1; }
+}

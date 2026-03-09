@@ -1,0 +1,52 @@
+.km-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #ebebeb;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+}
+
+.km-map {
+  width: 100%;
+  /* height is set via inline style from the height prop */
+}
+
+.km-legend {
+  display: flex;
+  gap: 20px;
+  padding: 10px 16px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
+.km-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #555;
+  font-weight: 600;
+}
+
+.km-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.km-dot--kitchen  { background: #1a1a1a; }
+.km-dot--customer { background: #16a34a; }
+
+.km-no-location {
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #f9f9f7;
+  border: 1px dashed #ddd;
+  border-radius: 16px;
+  color: #aaa;
+  font-size: 14px;
+}
+.km-no-location span { font-size: 28px; }

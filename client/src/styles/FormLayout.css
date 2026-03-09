@@ -1,0 +1,146 @@
+.form-page {
+  min-height: 90vh;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 650px;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+}
+
+.form-card h2 {
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.form-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.form-grid input:focus,
+.form-grid textarea:focus,
+.form-grid select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79,70,229,0.15);
+}
+
+.file-upload {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.file-upload:hover {
+  border-color: #4f46e5;
+  background: #f9fafb;
+}
+
+.form-submit {
+  margin-top: 25px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  background: #48bbaa;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.form-submit:hover {
+  background: #4338ca;
+}
+
+.form-error {
+  color: red;
+  margin-bottom: 15px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.group-label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.amenities-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.checkbox-item input {
+  accent-color: #e23744;
+}
+.form-container {
+
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+
+}
+
+.form {
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+}
+
+.form input,
+.form textarea,
+.form select {
+
+  padding: 10px;
+  font-size: 16px;
+
+}
+
+.form button {
+
+  padding: 12px;
+  background: black;
+  color: white;
+  border: none;
+
+}
+

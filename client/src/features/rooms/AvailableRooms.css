@@ -1,0 +1,650 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+/* ── Tokens ──────────────────────────────────────────────────────────────────── */
+:root {
+  --ar-bg:           #f4f6f9;
+  --ar-surface:      #ffffff;
+  --ar-border:       #e2e8f0;
+  --ar-blue:         #2563eb;
+  --ar-blue-light:   #eff6ff;
+  --ar-blue-dark:    #1d4ed8;
+  --ar-text:         #0f172a;
+  --ar-muted:        #64748b;
+  --ar-radius-card:  16px;
+  --ar-radius-sm:    10px;
+  --ar-shadow-card:  0 2px 10px rgba(0,0,0,0.06);
+  --ar-shadow-hover: 0 10px 30px rgba(0,0,0,0.12);
+  --ar-font-display: 'Playfair Display', Georgia, serif;
+  --ar-font-body:    'DM Sans', system-ui, sans-serif;
+}
+
+/* ── Page ────────────────────────────────────────────────────────────────────── */
+.ar-container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 36px 24px 64px;
+  background: var(--ar-bg);
+  min-height: 100vh;
+  font-family: var(--ar-font-body);
+}
+
+.ar-skeleton-wrap {
+  padding: 40px 24px;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+/* ── Title ───────────────────────────────────────────────────────────────────── */
+.ar-page-title {
+  font-family: var(--ar-font-display);
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 800;
+  color: var(--ar-text);
+  margin: 0 0 28px;
+  letter-spacing: -0.02em;
+  position: relative;
+  display: inline-block;
+}
+
+.ar-page-title::after {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 3px;
+  background: var(--ar-blue);
+  border-radius: 2px;
+  margin-top: 8px;
+}
+
+/* ── Search bar ──────────────────────────────────────────────────────────────── */
+.ar-search-wrap {
+  margin-bottom: 32px;
+}
+
+.ar-search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--ar-surface);
+  border: 1.5px solid var(--ar-border);
+  border-radius: 14px;
+  padding: 6px 6px 6px 16px;
+  box-shadow: var(--ar-shadow-card);
+  gap: 10px;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.ar-search-bar:focus-within {
+  border-color: var(--ar-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.ar-search-icon {
+  color: var(--ar-muted);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.ar-search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--ar-font-body);
+  font-size: 14.5px;
+  color: var(--ar-text);
+  background: transparent;
+  padding: 8px 0;
+}
+
+.ar-search-bar input::placeholder {
+  color: var(--ar-muted);
+}
+
+.ar-filter-trigger {
+  background: var(--ar-blue);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-family: var(--ar-font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+
+.ar-filter-trigger:hover {
+  background: var(--ar-blue-dark);
+}
+
+/* ── Grid ────────────────────────────────────────────────────────────────────── */
+.ar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+  gap: 22px;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────────── */
+.ar-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--ar-surface);
+  border-radius: var(--ar-radius-card);
+  overflow: hidden;
+  border: 1.5px solid var(--ar-border);
+  box-shadow: var(--ar-shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+  animation: ar-fadeup 0.35s ease both;
+}
+
+.ar-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--ar-shadow-hover);
+  border-color: #c7d7f5;
+}
+
+@keyframes ar-fadeup {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.ar-grid .ar-card:nth-child(1) { animation-delay: 0.03s; }
+.ar-grid .ar-card:nth-child(2) { animation-delay: 0.07s; }
+.ar-grid .ar-card:nth-child(3) { animation-delay: 0.11s; }
+.ar-grid .ar-card:nth-child(4) { animation-delay: 0.15s; }
+.ar-grid .ar-card:nth-child(5) { animation-delay: 0.19s; }
+.ar-grid .ar-card:nth-child(6) { animation-delay: 0.23s; }
+
+.ar-card__image-wrap {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  background: #e8edf5;
+}
+
+.ar-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.ar-card:hover .ar-card__image {
+  transform: scale(1.05);
+}
+
+.ar-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 16px 18px 18px;
+  flex: 1;
+}
+
+.ar-card__title {
+  font-family: var(--ar-font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ar-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.ar-card__address {
+  font-size: 12.5px;
+  color: var(--ar-muted);
+  margin: 0;
+}
+
+.ar-card__footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--ar-border);
+}
+
+.ar-card__price {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ar-blue);
+  letter-spacing: -0.02em;
+}
+
+.ar-card__price small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ar-muted);
+  margin-left: 2px;
+}
+
+/* ── Empty / Error ───────────────────────────────────────────────────────────── */
+.ar-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+}
+
+.ar-empty__icon { font-size: 52px; margin-bottom: 16px; opacity: 0.4; }
+.ar-empty__text { font-size: 15px; color: var(--ar-muted); margin: 0; }
+.ar-error-msg   { text-align: center; color: #dc2626; padding: 40px; font-size: 15px; }
+
+/* ── Modal overlay ───────────────────────────────────────────────────────────── */
+.ar-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: ar-fadein 0.18s ease;
+}
+
+@keyframes ar-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Modal ───────────────────────────────────────────────────────────────────── */
+.ar-modal {
+  background: var(--ar-surface);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+  animation: ar-slideup 0.22s ease;
+  font-family: var(--ar-font-body);
+}
+
+@keyframes ar-slideup {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.ar-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--ar-border);
+}
+
+.ar-modal__header h2 {
+  font-family: var(--ar-font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ar-text);
+  margin: 0;
+}
+
+.ar-modal__close {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--ar-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.ar-modal__close:hover { background: #e2e8f0; }
+
+.ar-modal__body {
+  overflow-y: auto;
+  padding: 4px 24px 8px;
+  flex: 1;
+}
+
+/* ── Filter sections ─────────────────────────────────────────────────────────── */
+.ar-filter-section {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--ar-border);
+}
+
+.ar-filter-section:last-child { border-bottom: none; }
+
+.ar-filter-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ar-text);
+  margin: 0 0 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Price inputs ────────────────────────────────────────────────────────────── */
+.ar-price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ar-price-inputs input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1.5px solid var(--ar-border);
+  border-radius: var(--ar-radius-sm);
+  font-family: var(--ar-font-body);
+  font-size: 14px;
+  color: var(--ar-text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.ar-price-inputs input:focus { border-color: var(--ar-blue); }
+.ar-price-inputs span { color: var(--ar-muted); font-weight: 600; }
+
+.ar-range {
+  width: 100%;
+  accent-color: var(--ar-blue);
+  cursor: pointer;
+}
+
+/* ── Counter ─────────────────────────────────────────────────────────────────── */
+.ar-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ar-counter:last-child { border-bottom: none; }
+
+.ar-counter__label {
+  font-size: 14px;
+  color: var(--ar-text);
+  font-weight: 500;
+}
+
+.ar-counter__controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ar-counter__controls button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ar-border);
+  background: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ar-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.ar-counter__controls button:hover {
+  border-color: var(--ar-blue);
+  background: var(--ar-blue-light);
+  color: var(--ar-blue);
+}
+
+.ar-counter__controls > span {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ar-text);
+  min-width: 32px;
+  text-align: center;
+}
+
+/* ── Amenities ───────────────────────────────────────────────────────────────── */
+.ar-amenities-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ar-amenity {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 14px;
+  border: 1.5px solid var(--ar-border);
+  border-radius: 10px;
+  background: #fff;
+  font-family: var(--ar-font-body);
+  font-size: 13.5px;
+  color: var(--ar-text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.ar-amenity:hover { border-color: var(--ar-blue); background: var(--ar-blue-light); }
+
+.ar-amenity--active {
+  border-color: var(--ar-blue);
+  background: var(--ar-blue-light);
+  color: var(--ar-blue);
+  font-weight: 600;
+}
+
+.ar-amenity__icon { font-size: 13px; }
+
+/* ── Select ──────────────────────────────────────────────────────────────────── */
+.ar-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--ar-border);
+  border-radius: var(--ar-radius-sm);
+  font-family: var(--ar-font-body);
+  font-size: 14px;
+  color: var(--ar-text);
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ar-select:focus { border-color: var(--ar-blue); }
+
+/* ── Checkbox ────────────────────────────────────────────────────────────────── */
+.ar-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ar-text);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.ar-checkbox-label input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--ar-blue);
+  cursor: pointer;
+}
+
+/* ── Modal footer ────────────────────────────────────────────────────────────── */
+.ar-modal__footer {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--ar-border);
+}
+
+.ar-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-family: var(--ar-font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s;
+  border: 1.5px solid transparent;
+}
+
+.ar-btn--clear {
+  background: #fff;
+  border-color: var(--ar-border);
+  color: var(--ar-text);
+}
+
+.ar-btn--clear:hover { background: #f1f5f9; }
+
+.ar-btn--apply {
+  background: var(--ar-blue);
+  color: #fff;
+  border-color: var(--ar-blue);
+}
+
+.ar-btn--apply:hover { background: var(--ar-blue-dark); }
+/* ── APPEND THESE TO THE BOTTOM OF AvailableRooms.css ── */
+
+/* Filter badge on button */
+.ar-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  background: #EF4444;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
+/* Active filter chips below search bar */
+.ar-active-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -8px 0 12px;
+}
+
+.ar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #EEF2FF;
+  color: #4338CA;
+  border: 1px solid #C7D2FE;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ar-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6366F1;
+  font-size: 11px;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Gender filter buttons */
+.ar-gender-options {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ar-gender-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  transition: all 0.15s;
+}
+
+.ar-gender-btn span {
+  font-size: 20px;
+}
+
+.ar-gender-btn:hover {
+  border-color: #6366F1;
+  color: #4338CA;
+}
+
+.ar-gender-btn--active {
+  border-color: #6366F1 !important;
+  background: #EEF2FF !important;
+  color: #4338CA !important;
+}
+
+/* Filter hint text */
+.ar-filter-hint {
+  font-size: 11px;
+  color: #9CA3AF;
+  margin: 2px 0 0;
+}
+
+/* Badges on room card image */
+.ar-card__badges {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ar-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  backdrop-filter: blur(4px);
+}
+
+.ar-card__badge--roommate {
+  background: rgba(16, 185, 129, 0.85);
+  color: #fff;
+}
+
+.ar-card__badge--gender {
+  background: rgba(99, 102, 241, 0.85);
+  color: #fff;
+}
+
+/* Make sure image wrap has position relative for badges */
+.ar-card__image-wrap {
+  position: relative;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ar-container { padding: 24px 16px 48px; }
+  .ar-grid { grid-template-columns: 1fr; gap: 16px; }
+  .ar-modal { max-height: 92vh; border-radius: 20px 20px 0 0; align-self: flex-end; }
+  .ar-modal-overlay { align-items: flex-end; padding: 0; }
+}

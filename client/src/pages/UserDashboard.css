@@ -1,0 +1,967 @@
+/* ── Page ── */
+.ud-page {
+  min-height: 100vh;
+  background: #fafaf8;
+  padding: 32px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: "Manrope", sans-serif;
+}
+
+.ud-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ud-page-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111;
+}
+
+.ud-browse-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ud-browse-btn:hover { background: #333; }
+
+/* ── Tabs ── */
+.ud-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.ud-tab {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 2px solid #e5e5e5;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+.ud-tab.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* ── Main grid ── */
+.ud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── Kitchen hero card ── */
+.ud-kitchen-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  height: 220px;
+  background: #1a1a1a;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 16px;
+}
+.ud-kitchen-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+}
+
+.ud-kitchen-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.65;
+  display: block;
+}
+
+.ud-kitchen-overlay {
+  position: absolute;
+  inset: 0;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 60%);
+}
+
+.ud-kitchen-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+.ud-kitchen-address {
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  margin: 0 0 8px;
+}
+
+.ud-kitchen-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255,255,255,0.2);
+  padding: 4px 12px;
+  border-radius: 999px;
+  width: fit-content;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Info row ── */
+.ud-info-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ud-info-pill {
+  flex: 1;
+  min-width: 90px;
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ud-info-label {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ud-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+.ud-status-dot--active  { background: #16a34a; }
+.ud-status-dot--paused  { background: #f59e0b; }
+.ud-status-dot--expired { background: #ef4444; }
+
+.ud-status-text--active  { color: #16a34a; }
+.ud-status-text--paused  { color: #f59e0b; }
+.ud-status-text--expired { color: #ef4444; }
+
+.ud-urgent { color: #ef4444; }
+
+/* ── Progress bar ── */
+.ud-progress-wrap { margin-bottom: 20px; }
+
+.ud-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #aaa;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.ud-progress-pct { color: #555; }
+
+.ud-progress-bar {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ud-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* ── Actions ── */
+.ud-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.ud-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ud-btn--pause {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 2px solid #fed7aa;
+}
+.ud-btn--pause:hover { background: #ffedd5; }
+
+.ud-btn--resume {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 2px solid #bbf7d0;
+}
+.ud-btn--resume:hover { background: #dcfce7; }
+
+.ud-btn--secondary {
+  background: #fff;
+  color: #333;
+  border: 2px solid #e5e5e5;
+}
+.ud-btn--secondary:hover { background: #f5f5f5; }
+
+.ud-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Sections ── */
+.ud-section {
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.ud-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 16px;
+}
+
+/* ── Meals ── */
+.ud-meals-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ud-meal-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fafaf8;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+}
+
+.ud-meal-img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.ud-meal-placeholder {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: #f0f0f0;
+  flex-shrink: 0;
+}
+
+.ud-meal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.ud-meal-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ud-meal-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.ud-paused-notice {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ud-empty-text {
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ── Empty state ── */
+.ud-empty {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 40px;
+}
+
+.ud-empty-icon { font-size: 56px; }
+
+.ud-empty h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+}
+
+.ud-empty p { color: #888; font-size: 15px; }
+
+.ud-empty-btn {
+  margin-top: 8px;
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .ud-grid {
+    grid-template-columns: 1fr;/* ── Page ── */
+.ud-page {
+  min-height: 100vh;
+  background: #fafaf8;
+  padding: 32px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: "Manrope", sans-serif;
+}
+
+.ud-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ud-page-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111;
+}
+
+.ud-browse-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ud-browse-btn:hover { background: #333; }
+
+/* ── Tabs ── */
+.ud-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.ud-tab {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 2px solid #e5e5e5;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s;
+}
+.ud-tab.active {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+/* ── Main grid ── */
+.ud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── Kitchen hero card ── */
+.ud-kitchen-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  height: 220px;
+  background: #1a1a1a;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 16px;
+}
+.ud-kitchen-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+}
+
+.ud-kitchen-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.65;
+  display: block;
+}
+
+.ud-kitchen-overlay {
+  position: absolute;
+  inset: 0;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 60%);
+}
+
+.ud-kitchen-name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px;
+}
+
+.ud-kitchen-address {
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  margin: 0 0 8px;
+}
+
+.ud-kitchen-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255,255,255,0.2);
+  padding: 4px 12px;
+  border-radius: 999px;
+  width: fit-content;
+  backdrop-filter: blur(4px);
+}
+
+/* ── Info row ── */
+.ud-info-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ud-info-pill {
+  flex: 1;
+  min-width: 90px;
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ud-info-label {
+  font-size: 11px;
+  color: #aaa;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ud-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-bottom: 2px;
+}
+.ud-status-dot--active  { background: #16a34a; }
+.ud-status-dot--paused  { background: #f59e0b; }
+.ud-status-dot--expired { background: #ef4444; }
+
+.ud-status-text--active  { color: #16a34a; }
+.ud-status-text--paused  { color: #f59e0b; }
+.ud-status-text--expired { color: #ef4444; }
+
+.ud-urgent { color: #ef4444; }
+
+/* ── Progress bar ── */
+.ud-progress-wrap { margin-bottom: 20px; }
+
+.ud-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #aaa;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.ud-progress-pct { color: #555; }
+
+.ud-progress-bar {
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ud-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* ── Actions ── */
+.ud-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.ud-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ud-btn--pause {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 2px solid #fed7aa;
+}
+.ud-btn--pause:hover { background: #ffedd5; }
+
+.ud-btn--resume {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 2px solid #bbf7d0;
+}
+.ud-btn--resume:hover { background: #dcfce7; }
+
+.ud-btn--secondary {
+  background: #fff;
+  color: #333;
+  border: 2px solid #e5e5e5;
+}
+.ud-btn--secondary:hover { background: #f5f5f5; }
+
+.ud-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Sections ── */
+.ud-section {
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.ud-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #111;
+  margin: 0 0 16px;
+}
+
+/* ── Meals ── */
+.ud-meals-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ud-meal-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fafaf8;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #f0f0f0;
+}
+
+.ud-meal-img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.ud-meal-placeholder {
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: #f0f0f0;
+  flex-shrink: 0;
+}
+
+.ud-meal-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0;
+}
+
+.ud-meal-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ud-meal-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111;
+}
+
+.ud-paused-notice {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.ud-empty-text {
+  color: #aaa;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ── Empty state ── */
+.ud-empty {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 40px;
+}
+
+.ud-empty-icon { font-size: 56px; }
+
+.ud-empty h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111;
+}
+
+.ud-empty p { color: #888; font-size: 15px; }
+
+.ud-empty-btn {
+  margin-top: 8px;
+  background: #111;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .ud-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .ud-page { padding: 20px 16px 48px; }
+  .ud-page-title { font-size: 22px; }
+  .ud-kitchen-card { height: 180px; }
+  .ud-kitchen-name { font-size: 18px; }
+  .ud-info-row { gap: 8px; }
+  .ud-info-pill { padding: 10px 12px; }
+}
+
+/* ── Pause banner ── */
+.ud-pause-banner {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.ud-pause-banner-top {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: #c2410c;
+  font-weight: 600;
+  flex-wrap: wrap;
+}
+
+.ud-pause-banner-sub {
+  font-size: 12px;
+  color: #9a3412;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ── Pause drawer ── */
+.ud-pause-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+@media (min-width: 600px) {
+  .ud-pause-overlay {
+    align-items: center;
+  }
+}
+
+.ud-pause-drawer {
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+}
+
+@media (min-width: 600px) {
+  .ud-pause-drawer {
+    border-radius: 24px;
+    max-height: 85vh;
+  }
+}
+
+.ud-pause-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+.ud-pause-drawer-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #111;
+  margin: 0;
+}
+
+.ud-pause-drawer-close {
+  background: #f5f5f5;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 14px;
+  cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ud-pause-drawer-close:hover { background: #ebebeb; }
+  }
+}
+
+@media (max-width: 600px) {
+  .ud-page { padding: 20px 16px 48px; }
+  .ud-page-title { font-size: 22px; }
+  .ud-kitchen-card { height: 180px; }
+  .ud-kitchen-name { font-size: 18px; }
+  .ud-info-row { gap: 8px; }
+  .ud-info-pill { padding: 10px 12px; }
+}
+/* ── APPEND TO UserDashboard.css ── */
+
+/* Bill card */
+.ud-bill-card {
+  background: #fff;
+  border: 1.5px solid #e8e0d5;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.ud-bill-status {
+  padding: 8px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-bottom: 1px solid;
+  letter-spacing: 0.02em;
+}
+
+.ud-bill-breakdown {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ud-bill-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #5a5048;
+}
+
+.ud-bill-row span:first-child { color: #8a7f74; }
+.ud-bill-row span:last-child  { font-weight: 600; color: #1c1a17; }
+
+.ud-bill-row--deduct span { color: #2d6a4f !important; }
+.ud-bill-row--deduct span:last-child { font-weight: 700; }
+
+.ud-bill-divider {
+  height: 1px;
+  background: #e8e0d5;
+  margin: 2px 0;
+}
+
+.ud-bill-row--total span {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #1c1a17 !important;
+}
+
+.ud-bill-row--total span:last-child { color: #c2692a !important; }
+
+/* Pay buttons */
+.ud-bill-actions {
+  padding: 0 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ud-bill-pay-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+  background: #c2692a;
+  color: #fff;
+}
+
+.ud-bill-pay-btn--early {
+  background: #fdf0e6;
+  color: #c2692a;
+  border: 1.5px solid #f0d5be;
+}
+
+.ud-bill-pay-btn:hover:not(:disabled) { opacity: 0.85; }
+.ud-bill-pay-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.ud-bill-submitted-note {
+  font-size: 12.5px;
+  color: #c2692a;
+  text-align: center;
+  padding: 8px 0 4px;
+  font-style: italic;
+}
+
+.ud-bill-not-generated {
+  font-size: 12px;
+  color: #8a7f74;
+  padding: 0 16px 14px;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.ud-bill-loading {
+  font-size: 13px;
+  color: #8a7f74;
+  padding: 12px 0;
+  font-style: italic;
+}

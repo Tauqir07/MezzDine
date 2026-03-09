@@ -1,0 +1,320 @@
+.pp-wrap {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  padding: 20px;
+  margin-top: 24px;
+}
+.pp-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 6px;
+}
+.pp-sub {
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 14px;
+}
+
+/* Cutoff guide */
+.pp-cutoffs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+.pp-cutoff-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #333;
+}
+.pp-cutoff-note {
+  font-size: 12px;
+  color: #888;
+}
+
+/* Label */
+.pp-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #555;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Date row */
+.pp-date-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 14px;
+}
+.pp-date-btn {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  transition: 0.15s;
+  position: relative;
+  min-width: 52px;
+  font-family: inherit;
+}
+.pp-date-btn:hover   { border-color: #16a34a; }
+.pp-date-btn.active  { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+.pp-date-btn.paused  { border-color: #f59e0b; }
+.pp-date-day { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+.pp-date-num { font-size: 16px; font-weight: 800; line-height: 1; }
+.pp-date-paused-dot {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+
+/* Full day toggle */
+.pp-fullday-row { margin-bottom: 12px; }
+.pp-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+}
+.pp-toggle-label input { accent-color: #1a1a1a; width: 16px; height: 16px; cursor: pointer; }
+
+/* Meal buttons */
+.pp-meals {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.pp-meal-btn {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.15s;
+  color: #333;
+}
+.pp-meal-btn:hover  { border-color: #1a1a1a; }
+.pp-meal-btn.active { background: #1a1a1a; color: #fff; border-color: #1a1a1a; }
+
+/* Save button */
+.pp-save-btn {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  border: none;
+  background: #16a34a;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-bottom: 8px;
+}
+.pp-save-btn:hover:not(:disabled) { background: #15803d; }
+.pp-save-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+.pp-err { font-size: 13px; color: #dc2626; font-weight: 600; margin-bottom: 8px; }
+.pp-feedback { font-size: 13px; font-weight: 600; margin: 0; }
+.pp-feedback--ok { color: #16a34a; }
+
+/* Active pauses list */
+.pp-active { margin-top: 16px; }
+.pp-active-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #555;
+  margin-bottom: 8px;
+}
+.pp-active-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.pp-active-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+.pp-remove-btn {
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid #fca5a5;
+  background: #fff;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.pp-remove-btn:hover { background: #fee2e2; }
+/* ── ADD THESE TO THE BOTTOM OF YOUR PausePanel.css ── */
+
+/* History toggle button */
+.pp-history-wrap {
+  margin-top: 20px;
+  border: 1.5px solid #E0E7FF;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pp-history-toggle {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #F5F3FF;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #3730A3;
+  gap: 8px;
+}
+.pp-history-toggle:hover { background: #EEF2FF; }
+
+.pp-history-badge {
+  display: inline-block;
+  margin-left: 8px;
+  background: #DC2626;
+  color: #fff;
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pp-history-arrow {
+  font-size: 11px;
+  color: #6366F1;
+}
+
+/* History inner */
+.pp-history {
+  padding: 4px 0 8px;
+  background: #fff;
+}
+
+.pp-history-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  background: #6366F1;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+/* Item row */
+.pp-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.pp-item-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1F2937;
+}
+
+.pp-item-meals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* Source tags */
+.pp-source-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 4px;
+}
+.pp-source-tag--kitchen  { background: #FEF3C7; color: #D97706; }
+.pp-source-tag--customer { background: #EEF2FF; color: #4338CA; }
+
+/* Today highlight */
+.pp-today-tag {
+  font-size: 10px;
+  font-weight: 700;
+  background: #FEF3C7;
+  color: #D97706;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.pp-item--today { background: #FFFBEB !important; }
+.pp-item--past  { opacity: 0.6; }
+
+/* Full day pill */
+.pp-fullday-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+/* Past toggle */
+.pp-past-toggle {
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  border-top: 1px dashed #E5E7EB;
+  font-size: 12px;
+  color: #6B7280;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 600;
+}
+.pp-past-toggle:hover { color: #374151; }
+
+.pp-past-list { opacity: 0.75; }

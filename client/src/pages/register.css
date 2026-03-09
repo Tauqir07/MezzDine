@@ -1,0 +1,451 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+/* ── Tokens (same as login) ──────────────────────────────────────────────────── */
+:root {
+  --rg-amber:        #c2692a;
+  --rg-amber-dark:   #a0541f;
+  --rg-amber-light:  #fdf0e6;
+  --rg-text:         #0f172a;
+  --rg-muted:        #64748b;
+  --rg-border:       #e2e8f0;
+  --rg-surface:      #ffffff;
+  --rg-bg:           #f7f3ee;
+  --rg-font-display: 'Playfair Display', Georgia, serif;
+  --rg-font-body:    'DM Sans', system-ui, sans-serif;
+  --rg-radius:       14px;
+}
+
+/* ── Wrapper ─────────────────────────────────────────────────────────────────── */
+.rg-wrapper {
+  display: flex;
+  min-height: 100vh;
+  font-family: var(--rg-font-body);
+  background: var(--rg-bg);
+}
+
+/* ── Left panel ──────────────────────────────────────────────────────────────── */
+.rg-panel {
+  flex: 1;
+  background: linear-gradient(150deg, #1c1a17 0%, #3b2a1a 60%, #c2692a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.rg-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.rg-panel__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 360px;
+}
+
+.rg-panel__logo    { font-size: 44px; margin-bottom: 28px; }
+
+.rg-panel__heading {
+  font-family: var(--rg-font-display);
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 14px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.rg-panel__sub {
+  font-size: 15.5px;
+  color: rgba(255,255,255,0.65);
+  margin: 0 0 32px;
+  line-height: 1.6;
+}
+
+.rg-panel__perks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rg-panel__perks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+  color: rgba(255,255,255,0.8);
+}
+
+.rg-panel__perks li span {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* ── Right form side ─────────────────────────────────────────────────────────── */
+.rg-form-side {
+  flex: 0 0 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background: var(--rg-surface);
+  overflow-y: auto;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────────── */
+.rg-card {
+  width: 100%;
+  max-width: 400px;
+  animation: rg-fadein 0.38s ease both;
+}
+
+@keyframes rg-fadein {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+.rg-card__header   { margin-bottom: 24px; }
+
+.rg-card__title {
+  font-family: var(--rg-font-display);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--rg-text);
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.rg-card__sub {
+  font-size: 14.5px;
+  color: var(--rg-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.rg-card__sub strong { color: var(--rg-text); }
+
+/* ── Method toggle ───────────────────────────────────────────────────────────── */
+.rg-method-toggle {
+  display: flex;
+  background: var(--rg-bg);
+  border: 1.5px solid var(--rg-border);
+  border-radius: 12px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 22px;
+}
+
+.rg-method-btn {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font-family: var(--rg-font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--rg-muted);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+
+.rg-method-btn--active {
+  background: var(--rg-surface);
+  color: var(--rg-text);
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+}
+
+/* ── Error ───────────────────────────────────────────────────────────────────── */
+.rg-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff1f1;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13.5px;
+  color: #b91c1c;
+  margin-bottom: 18px;
+}
+
+/* ── Form ────────────────────────────────────────────────────────────────────── */
+.rg-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.rg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rg-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rg-text);
+  letter-spacing: 0.01em;
+}
+
+.rg-field input,
+.rg-field select {
+  padding: 11px 14px;
+  border: 1.5px solid var(--rg-border);
+  border-radius: var(--rg-radius);
+  font-family: var(--rg-font-body);
+  font-size: 14.5px;
+  color: var(--rg-text);
+  background: var(--rg-bg);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.rg-field input::placeholder { color: #b0b8c4; }
+
+.rg-field input:focus,
+.rg-field select:focus {
+  border-color: var(--rg-amber);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(194,105,42,0.12);
+}
+
+.rg-field select { cursor: pointer; appearance: auto; }
+.rg-select--filled { color: var(--rg-text); }
+
+/* ── Phone input ─────────────────────────────────────────────────────────────── */
+.rg-phone-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--rg-border);
+  border-radius: var(--rg-radius);
+  background: var(--rg-bg);
+  overflow: hidden;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.rg-phone-wrap:focus-within {
+  border-color: var(--rg-amber);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(194,105,42,0.12);
+}
+
+.rg-phone-prefix {
+  padding: 11px 12px 11px 14px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--rg-muted);
+  background: transparent;
+  border-right: 1.5px solid var(--rg-border);
+  white-space: nowrap;
+}
+
+.rg-phone-wrap input {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  flex: 1;
+  outline: none;
+}
+
+/* ── Password wrap ───────────────────────────────────────────────────────────── */
+.rg-password-wrap {
+  position: relative;
+}
+
+.rg-password-wrap input { padding-right: 44px; }
+
+.rg-eye-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  line-height: 1;
+  color: var(--rg-muted);
+  transition: opacity 0.15s;
+}
+
+.rg-eye-btn:hover { opacity: 0.7; }
+
+/* ── Submit button ───────────────────────────────────────────────────────────── */
+.rg-btn {
+  margin-top: 4px;
+  padding: 13px;
+  background: var(--rg-amber);
+  color: #fff;
+  border: none;
+  border-radius: var(--rg-radius);
+  font-family: var(--rg-font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.18s, transform 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+}
+
+.rg-btn:hover:not(:disabled) {
+  background: var(--rg-amber-dark);
+  transform: translateY(-1px);
+}
+
+.rg-btn:active:not(:disabled) { transform: translateY(0); }
+.rg-btn:disabled { opacity: 0.75; cursor: not-allowed; }
+.rg-btn--loading { pointer-events: none; }
+
+.rg-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: rg-spin 0.7s linear infinite;
+  display: block;
+}
+
+@keyframes rg-spin { to { transform: rotate(360deg); } }
+
+/* ── Switch link ─────────────────────────────────────────────────────────────── */
+.rg-switch {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--rg-muted);
+}
+
+.rg-switch a {
+  color: var(--rg-amber);
+  font-weight: 600;
+  text-decoration: none;
+  margin-left: 4px;
+  transition: color 0.15s;
+}
+
+.rg-switch a:hover {
+  color: var(--rg-amber-dark);
+  text-decoration: underline;
+}
+
+/* ── Back button (OTP step) ──────────────────────────────────────────────────── */
+.rg-back-btn {
+  background: none;
+  border: none;
+  font-family: var(--rg-font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--rg-muted);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rg-back-btn:hover { color: var(--rg-text); }
+
+/* ── OTP boxes ───────────────────────────────────────────────────────────────── */
+.rg-otp-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 8px 0 4px;
+}
+
+.rg-otp-box {
+  width: 52px;
+  height: 58px;
+  border: 1.5px solid var(--rg-border);
+  border-radius: 12px;
+  background: var(--rg-bg);
+  text-align: center;
+  font-family: var(--rg-font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--rg-text);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+  caret-color: transparent;
+}
+
+.rg-otp-box:focus {
+  border-color: var(--rg-amber);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(194,105,42,0.12);
+}
+
+.rg-otp-box--filled {
+  border-color: var(--rg-amber);
+  background: var(--rg-amber-light);
+}
+
+/* ── Resend ──────────────────────────────────────────────────────────────────── */
+.rg-resend {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--rg-muted);
+}
+
+.rg-resend-btn {
+  background: none;
+  border: none;
+  font-family: var(--rg-font-body);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--rg-amber);
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  transition: color 0.15s;
+}
+
+.rg-resend-btn:hover:not(:disabled) {
+  color: var(--rg-amber-dark);
+  text-decoration: underline;
+}
+
+.rg-resend-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .rg-wrapper     { flex-direction: column; }
+  .rg-panel       { padding: 36px 24px; min-height: 200px; }
+  .rg-panel__perks { display: none; }
+  .rg-form-side   { flex: unset; padding: 36px 24px 52px; }
+}
+
+@media (max-width: 420px) {
+  .rg-otp-box { width: 42px; height: 50px; font-size: 18px; }
+  .rg-otp-row { gap: 7px; }
+}
