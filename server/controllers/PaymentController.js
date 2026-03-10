@@ -5,14 +5,56 @@ import Kitchen      from "../models/kitchen.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError     from "../utils/AppError.js";
 
-const MEALS_PER_PLAN = { one: 1, two: 2, three: 3 };
+const MEALS_PER_PLAN = {
+  breakfast: 1,
+  lunch:     1,
+  dinner:    1,
+  one:       1, // legacy: dinner only
+  two:       2,
+  three:     3,
+};
+
+// ── Meal cutoff times (24hr) ──────────────────────────────────────────────────
+// Breakfast served:  before 6:00 AM cutoff
+// Lunch served:      before 11:00 AM cutoff
+// Dinner served:     before 6:00 PM cutoff
+const CUT_BREAKFAST =  6; // subscribe before 6 AM  → get breakfast today
+const CUT_LUNCH     = 11; // subscribe before 11 AM → get lunch today
+const CUT_DINNER    = 18; // subscribe before 6 PM  → get dinner today, after → next day
+
+// ── Helper: how many meals on the subscription START day based on signup time ─
+// preferredMeal is only used when mealPlan === "one"
+function mealsOnFirstDay(mealPlan, subscribeHour, preferredMeal) {
+  if (mealPlan === "one") {
+    // Use the customer's chosen meal time
+    const meal = preferredMeal || "dinner"; // default to dinner if not set
+    if (meal === "breakfast") return subscribeHour < CUT_BREAKFAST ? 1 : 0;
+    if (meal === "lunch")     return subscribeHour < CUT_LUNCH     ? 1 : 0;
+    if (meal === "dinner")    return subscribeHour < CUT_DINNER    ? 1 : 0;
+  }
+  if (mealPlan === "three") {
+    if (subscribeHour < CUT_BREAKFAST) return 3; // all 3
+    if (subscribeHour < CUT_LUNCH)     return 2; // lunch + dinner
+    if (subscribeHour < CUT_DINNER)    return 1; // dinner only
+    return 0;
+  }
+  if (mealPlan === "two") {
+    if (subscribeHour < CUT_LUNCH)  return 2; // lunch + dinner
+    if (subscribeHour < CUT_DINNER) return 1; // dinner only
+    return 0;
+  }
+  return 0;
+}
 
 // ── Helper: price per meal ────────────────────────────────────────────────────
 function pricePerMeal(kitchen, mealPlan) {
   const priceMap = {
-    one:   kitchen.oneMealPrice,
-    two:   kitchen.twoMealPrice,
-    three: kitchen.threeMealPrice,
+    breakfast: kitchen.breakfastPrice,
+    lunch:     kitchen.lunchPrice,
+    dinner:    kitchen.dinnerPrice,
+    one:       kitchen.dinnerPrice || kitchen.oneMealPrice, // legacy fallback
+    two:       kitchen.twoMealPrice,
+    three:     kitchen.threeMealPrice,
   };
   const monthly      = priceMap[mealPlan] || 0;
   const mealsPerDay  = MEALS_PER_PLAN[mealPlan] || 1;
@@ -30,19 +72,25 @@ function currentMonth() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
-// ── Helper: how many paused meals in a given month ────────────────────────────
+// ── Helper: how many paused meals in a given month (past dates only) ─────────
 async function pausedMealsInMonth(userId, kitchenId, month, mealsPerDay) {
   const [year, mon] = month.split("-").map(Number);
   const start       = new Date(year, mon - 1, 1);
   const end         = new Date(year, mon, 0); // last day of month
 
+  // Only count up to yesterday — upcoming pauses don't affect current bill
+  const today    = new Date();
+  today.setHours(0, 0, 0, 0);
+  const cutoff   = new Date(today.getTime() - 1); // end of yesterday
+
   const pause    = await MealPause.findOne({ userId, kitchenId });
   const dates    = pause?.dates || [];
 
-  // Filter dates that fall within this month
+  // Filter: must be within this month AND already happened (not today or future)
   const inMonth = dates.filter(d => {
     const date = new Date(d);
-    return date >= start && date <= end;
+    date.setHours(0, 0, 0, 0);
+    return date >= start && date <= end && date < today;
   });
 
   return inMonth.length * mealsPerDay;
@@ -59,6 +107,106 @@ async function unpaidMonthsCount(userId, kitchenId) {
   return unpaid;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   GET /payments/bill/:kitchenId
+   Returns the current month's bill for the logged-in customer
+   Always charges only for days consumed so far (not full month)
+───────────────────────────────────────────────────────────────────────────── */
+export const getMyBill = asyncHandler(async (req, res) => {
+  const { kitchenId } = req.params;
+
+  const [kitchen, sub] = await Promise.all([
+    Kitchen.findById(kitchenId),
+    Subscription.findOne({ userId: req.user.id, kitchenId }),
+  ]);
+
+  if (!kitchen) throw new AppError("Kitchen not found", 404);
+  if (!sub)     throw new AppError("Subscription not found", 403);
+
+  const month        = currentMonth();
+  const mealsPerDay  = MEALS_PER_PLAN[sub.mealPlan] || 1;
+  const priceMap     = {
+    breakfast: kitchen.breakfastPrice,
+    lunch:     kitchen.lunchPrice,
+    dinner:    kitchen.dinnerPrice,
+    one:       kitchen.dinnerPrice || kitchen.oneMealPrice,
+    two:       kitchen.twoMealPrice,
+    three:     kitchen.threeMealPrice,
+  };
+  const monthlyPrice = priceMap[sub.mealPlan] || 0;
+  const mealRate     = pricePerMeal(kitchen, sub.mealPlan);
+
+  const now         = new Date();
+  const dayOfMonth  = now.getDate();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+  // ── Subscription start logic ─────────────────────────────────────────────
+  const subStart        = new Date(sub.createdAt);
+  const subMonth        = `${subStart.getFullYear()}-${String(subStart.getMonth() + 1).padStart(2, "0")}`;
+  const isFirstSubMonth = subMonth === month;
+
+  let mealsDelivered;
+  let daysConsumed;
+
+  if (isFirstSubMonth) {
+    const startDay     = subStart.getDate();
+    const subHour      = subStart.getHours(); // local hour of subscription
+
+    // Meals on the actual subscription day (partial — depends on signup time)
+    const firstDayMeals = mealsOnFirstDay(sub.mealPlan, subHour, sub.preferredMeal);
+
+    // If they signed up after all cutoffs (e.g. 11pm), first day = 0 meals
+    // so effectively their plan starts from next day
+    const effectiveStartDay = firstDayMeals === 0 ? startDay + 1 : startDay;
+
+    // Full days after the start day up to today
+    const fullDaysAfter = Math.max(0, dayOfMonth - effectiveStartDay);
+
+    daysConsumed  = Math.max(0, dayOfMonth - startDay + 1);
+    mealsDelivered = firstDayMeals + (fullDaysAfter * mealsPerDay);
+  } else {
+    // Subscribed in a previous month — charge full days this month
+    daysConsumed   = dayOfMonth;
+    mealsDelivered = dayOfMonth * mealsPerDay;
+  }
+
+  mealsDelivered = Math.max(0, mealsDelivered);
+  const pausedMeals    = await pausedMealsInMonth(req.user.id, kitchenId, month, mealsPerDay);
+  const mealsCharged   = Math.max(0, mealsDelivered - pausedMeals);
+  const pauseDeduct    = Math.round(pausedMeals * mealRate);
+
+  const totalAmount = Math.round(mealsDelivered * mealRate);  // before pause deduction
+  const finalAmount = Math.round(mealsCharged   * mealRate);  // actual due
+
+  // Full month projection (reference only — shown as "monthly price")
+  const projectedMonthly = Math.round(daysInMonth * mealsPerDay * mealRate);
+
+  // Check if already has a payment record this month
+  const existing = await Payment.findOne({
+    userId: req.user.id, kitchenId, month, type: "monthly",
+  });
+
+  res.json({
+    success: true,
+    data: {
+      month,
+      mealPlan:          sub.mealPlan,
+      monthlyPrice,                      // plan's flat price (for reference)
+      projectedMonthly,                  // what full month would cost at daily rate
+      daysConsumed,                      // days since subscription started
+      daysInMonth,
+      mealsDelivered,
+      pausedMeals,
+      pauseDeduction:    pauseDeduct,
+      totalAmount,                       // mealsDelivered × rate (before pauses)
+      finalAmount,                       // actual due = mealsCharged × rate
+      status:            existing?.status || "not_generated",
+      paymentId:         existing?._id   || null,
+      upiId:             kitchen.upiId   || null,
+      kitchenName:       kitchen.kitchenName,
+    },
+  });
+});
 /* ─────────────────────────────────────────────────────────────────────────────
    POST /payments/advance/:kitchenId
    Called right after subscribe — creates the advance payment record
@@ -93,9 +241,12 @@ export const createAdvancePayment = asyncHandler(async (req, res) => {
   if (existing) return res.json({ success: true, data: existing });
 
   const priceMap = {
-    one:   kitchen.oneMealPrice,
-    two:   kitchen.twoMealPrice,
-    three: kitchen.threeMealPrice,
+    breakfast: kitchen.breakfastPrice,
+    lunch:     kitchen.lunchPrice,
+    dinner:    kitchen.dinnerPrice,
+    one:       kitchen.dinnerPrice || kitchen.oneMealPrice,
+    two:       kitchen.twoMealPrice,
+    three:     kitchen.threeMealPrice,
   };
 
   const amount = priceMap[mealPlan] || 0;
@@ -114,71 +265,6 @@ export const createAdvancePayment = asyncHandler(async (req, res) => {
 });
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   GET /payments/bill/:kitchenId
-   Returns the current month's bill for the logged-in customer
-   Supports early/mid-month calculation via ?early=true
-───────────────────────────────────────────────────────────────────────────── */
-export const getMyBill = asyncHandler(async (req, res) => {
-  const { kitchenId } = req.params;
-  const { early }     = req.query; // ?early=true for mid-month payment
-
-  const [kitchen, sub] = await Promise.all([
-    Kitchen.findById(kitchenId),
-    Subscription.findOne({ userId: req.user.id, kitchenId }),
-  ]);
-
-  if (!kitchen) throw new AppError("Kitchen not found", 404);
-  if (!sub)     throw new AppError("Subscription not found", 403);
-
-  const month        = currentMonth();
-  const mealsPerDay  = MEALS_PER_PLAN[sub.mealPlan] || 1;
-  const priceMap     = { one: kitchen.oneMealPrice, two: kitchen.twoMealPrice, three: kitchen.threeMealPrice };
-  const monthlyPrice = priceMap[sub.mealPlan] || 0;
-
-  // Paused meals this month
-  const pausedMeals  = await pausedMealsInMonth(req.user.id, kitchenId, month, mealsPerDay);
-  const mealRate     = pricePerMeal(kitchen, sub.mealPlan);
-  const pauseDeduct  = Math.round(pausedMeals * mealRate);
-
-  let totalAmount  = monthlyPrice;
-  let finalAmount  = monthlyPrice - pauseDeduct;
-
-  // Mid-month early payment: only charge meals delivered so far
-  if (early === "true") {
-    const now          = new Date();
-    const dayOfMonth   = now.getDate();
-    const mealsToDate  = dayOfMonth * mealsPerDay;
-    const pausedSoFar  = await pausedMealsInMonth(req.user.id, kitchenId, month, mealsPerDay);
-    const mealsCharged = Math.max(0, mealsToDate - pausedSoFar);
-    totalAmount        = Math.round(mealsCharged * mealRate);
-    finalAmount        = totalAmount;
-  }
-
-  // Check if already has a payment record this month
-  const existing = await Payment.findOne({
-    userId: req.user.id, kitchenId, month, type: "monthly",
-  });
-
-  // Return bill breakdown
-  res.json({
-    success: true,
-    data: {
-      month,
-      mealPlan:       sub.mealPlan,
-      monthlyPrice,
-      pausedMeals,
-      pauseDeduction: pauseDeduct,
-      totalAmount,
-      finalAmount,
-      status:         existing?.status || "not_generated",
-      paymentId:      existing?._id || null,
-      upiId:          kitchen.upiId || null,
-      kitchenName:    kitchen.kitchenName,
-    },
-  });
-});
-
-/* ─────────────────────────────────────────────────────────────────────────────
    POST /payments/generate/:kitchenId
    Owner generates monthly bills for ALL subscribers at start of month
    Or customer can trigger their own bill generation
@@ -193,7 +279,14 @@ export const generateMonthlyBill = asyncHandler(async (req, res) => {
     throw new AppError("Not authorized", 403);
 
   const subs = await Subscription.find({ kitchenId });
-  const priceMap = { one: kitchen.oneMealPrice, two: kitchen.twoMealPrice, three: kitchen.threeMealPrice };
+  const priceMap = {
+    breakfast: kitchen.breakfastPrice,
+    lunch:     kitchen.lunchPrice,
+    dinner:    kitchen.dinnerPrice,
+    one:       kitchen.dinnerPrice || kitchen.oneMealPrice,
+    two:       kitchen.twoMealPrice,
+    three:     kitchen.threeMealPrice,
+  };
 
   const results = [];
 

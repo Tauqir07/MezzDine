@@ -18,7 +18,8 @@ export default function KitchenDetails() {
   const [menu, setMenu]                   = useState({});
   const [similar, setSimilar]             = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [mealPlan, setMealPlan]           = useState("one");
+  const [mealPlan,      setMealPlan]      = useState("one");
+  const [preferredMeal, setPreferredMeal] = useState("dinner"); // for one-meal plan
   const [isSubscribed, setIsSubscribed]   = useState(false);
   const [errorMsg, setErrorMsg]           = useState("");
   const [dayIndex, setDayIndex]           = useState(0);
@@ -138,11 +139,12 @@ export default function KitchenDetails() {
       three: kitchen.threeMealPrice,
     };
     setAdvanceInfo({
-      kitchenName: kitchen.kitchenName,
-      upiId:       kitchen.upiId || null,
-      amount:      priceMap[plan] || 0,
-      month:       new Date().toISOString().slice(0, 7),
+      kitchenName:   kitchen.kitchenName,
+      upiId:         kitchen.upiId || null,
+      amount:        priceMap[plan] || 0,
+      month:         new Date().toISOString().slice(0, 7),
       plan,
+      preferredMeal: plan === "one" ? preferredMeal : null,
     });
     setShowPayment(true);
   }
@@ -153,7 +155,10 @@ export default function KitchenDetails() {
     setSubLoading(true);
     setErrorMsg("");
     try {
-      await api.post(`/kitchens/${id}/subscribe`, { mealPlan: advanceInfo?.plan || mealPlan });
+      await api.post(`/kitchens/${id}/subscribe`, {
+        mealPlan:      advanceInfo?.plan      || mealPlan,
+        preferredMeal: advanceInfo?.preferredMeal || null,
+      });
       setIsSubscribed(true);
       setSubCount(p => p + 1);
     } catch (err) {
@@ -508,21 +513,43 @@ export default function KitchenDetails() {
 
                   {/* Meal plan selector — only before subscribing */}
                   {!isSubscribed && (
-                    <select
-                      value={mealPlan}
-                      onChange={e => setMealPlan(e.target.value)}
-                      className="kd-meal-select"
-                    >
-                      {kitchen.oneMealPrice &&
-                        <option value="one">1 Meal — ₹{kitchen.oneMealPrice}/mo</option>
-                      }
-                      {kitchen.twoMealPrice &&
-                        <option value="two">2 Meals — ₹{kitchen.twoMealPrice}/mo</option>
-                      }
-                      {kitchen.threeMealPrice &&
-                        <option value="three">3 Meals — ₹{kitchen.threeMealPrice}/mo</option>
-                      }
-                    </select>
+                    <>
+                      <select
+                        value={mealPlan}
+                        onChange={e => setMealPlan(e.target.value)}
+                        className="kd-meal-select"
+                      >
+                        {kitchen.oneMealPrice > 0 &&
+                          <option value="one">1 Meal — ₹{kitchen.oneMealPrice}/mo</option>
+                        }
+                        {kitchen.twoMealPrice > 0 &&
+                          <option value="two">2 Meals (lunch + dinner) — ₹{kitchen.twoMealPrice}/mo</option>
+                        }
+                        {kitchen.threeMealPrice > 0 &&
+                          <option value="three">3 Meals (all day) — ₹{kitchen.threeMealPrice}/mo</option>
+                        }
+                      </select>
+
+                      {/* Which meal — only shown for 1-meal plan */}
+                      {mealPlan === "one" && (
+                        <div className="kd-preferred-meal">
+                          <p className="kd-preferred-label">Which meal do you want?</p>
+                          <div className="kd-meal-btns">
+                            {["breakfast", "lunch", "dinner"].map(m => (
+                              <button
+                                key={m}
+                                type="button"
+                                className={`kd-meal-btn ${preferredMeal === m ? "kd-meal-btn--active" : ""}`}
+                                onClick={() => setPreferredMeal(m)}
+                              >
+                                {m === "breakfast" ? "🌅" : m === "lunch" ? "☀️" : "🌙"}
+                                {" "}{m.charAt(0).toUpperCase() + m.slice(1)}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
 
                   <div id="subscribe">
@@ -593,7 +620,7 @@ function UnsubscribeModal({ kitchen, mealPlan, onConfirm, onCancel }) {
     two:   kitchen.twoMealPrice,
     three: kitchen.threeMealPrice,
   };
-  const mealsPerDay  = mealPlan === "three" ? 3 : mealPlan === "two" ? 2 : 1;
+  const mealsPerDay = mealPlan === "three" ? 3 : mealPlan === "two" ? 2 : 1;
   const monthlyPrice = priceMap[mealPlan] || 0;
 
   const today       = new Date();

@@ -28,7 +28,12 @@ import RoomDashboard from "./pages/RoomDashboard";
 import NotificationPage from "./pages/NotificationPage";
 import "leaflet/dist/leaflet.css";
 import useGPSLocation from "./hooks/useGPSLocation";
-
+import TermsAndConditions  from "./footer/Terms&Conditions/Terms&Conditions";
+import PrivacyPolicy        from "./footer/PrivacyPolicy/PrivacyPolicy";
+import SafetyGuidelines     from "./footer/Safety/SafetyGuidelines";
+import CommunityStandards   from "./footer/Community/CommunityStandards";
+import ReportProblem        from "./footer/report/ReportProblem";
+import ContactPage from "./footer/Contact/ContactPage";
 
 function App(){
 useGPSLocation();
@@ -162,6 +167,12 @@ return(
 <Route path="/kitchens/:id" element={<KitchenDetails/>}/>
 
 <Route path="*" element={<Home/>}/>
+<Route path="/terms"   element={<TermsAndConditions />} />
+<Route path="/privacy" element={<PrivacyPolicy />} />
+<Route path="/safety"    element={<SafetyGuidelines />} />
+<Route path="/community" element={<CommunityStandards />} />
+<Route path="/report"    element={<ReportProblem />} />
+<Route path="/contact" element={<ContactPage />} />
 
 </Routes>
 

@@ -24,10 +24,12 @@ import deliveryRoutes     from "./routes/Deliveryroutes.js";
 import visitRoutes        from "./routes/VisitRoutes.js";
 import paymentRoutes      from "./routes/PaymentRoutes.js";
 
-import Kitchen      from "./models/Kitchen.js";
+import Kitchen      from "./models/kitchen.js";
 import Payment      from "./models/Payment.js";
 import Subscription from "./models/Subscription.js";
 import MealPause    from "./models/MealPause.js";
+import reportRoutes from "./routes/ReportRoutes.js";
+import contactRoutes from "./routes/ContactRoutes.js";
 
 const app = express();
 
@@ -51,6 +53,8 @@ app.use("/api/room-rentals",    roomRentalRoutes);
 app.use("/api/delivery",        deliveryRoutes);
 app.use("/api/visits",          visitRoutes);
 app.use("/api/payments",        paymentRoutes);   // ← was PaymentRoutes (bug fix)
+app.use("/api/report", reportRoutes);
+app.use("/api/contact",   contactRoutes);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);

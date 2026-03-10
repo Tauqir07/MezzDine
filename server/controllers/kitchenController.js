@@ -12,7 +12,9 @@ export const createKitchen = asyncHandler(async (req, res) => {
 
   const {
     kitchenName, description, address, foodType,
-    halal, maxSubscribers, oneMealPrice, twoMealPrice, threeMealPrice,
+    halal, maxSubscribers,
+    oneMealPrice, twoMealPrice, threeMealPrice,  // legacy / multi-meal
+    breakfastPrice, lunchPrice, dinnerPrice,      // ← NEW specific plans
   } = req.body;
 
   if (!kitchenName || !address || !foodType || !maxSubscribers) {
@@ -32,6 +34,9 @@ export const createKitchen = asyncHandler(async (req, res) => {
     oneMealPrice:       oneMealPrice   ? Number(oneMealPrice)   : undefined,
     twoMealPrice:       twoMealPrice   ? Number(twoMealPrice)   : undefined,
     threeMealPrice:     threeMealPrice ? Number(threeMealPrice) : undefined,
+    breakfastPrice:     breakfastPrice ? Number(breakfastPrice) : undefined, // ← NEW
+    lunchPrice:         lunchPrice     ? Number(lunchPrice)     : undefined, // ← NEW
+    dinnerPrice:        dinnerPrice    ? Number(dinnerPrice)    : undefined, // ← NEW
     images,
   });
 
@@ -47,7 +52,6 @@ export const createKitchen = asyncHandler(async (req, res) => {
 
 export const getKitchens = asyncHandler(async (req, res) => {
   const kitchens = await Kitchen.find().lean();
-  // Attach live subscriber count from Subscription collection
   const counts = await Subscription.aggregate([
     { $group: { _id: "$kitchenId", count: { $sum: 1 } } }
   ]);
@@ -77,7 +81,6 @@ export const myKitchen = asyncHandler(async (req, res) => {
 export const getSingleKitchen = asyncHandler(async (req, res) => {
   const kitchen = await Kitchen.findById(req.params.kitchenId).lean();
   if (!kitchen) throw new AppError("Kitchen not found", 404);
-  // Always compute live count — never trust stored field
   const liveCount = await Subscription.countDocuments({ kitchenId: kitchen._id });
   res.json({ success: true, data: { ...kitchen, currentSubscribers: liveCount } });
 });
@@ -90,8 +93,10 @@ export const updateKitchen = asyncHandler(async (req, res) => {
 
   const {
     kitchenName, description, address, foodType,
-    halal, maxSubscribers, oneMealPrice, twoMealPrice, threeMealPrice,
-    upiId,   // ← ADDED
+    halal, maxSubscribers,
+    oneMealPrice, twoMealPrice, threeMealPrice,
+    breakfastPrice, lunchPrice, dinnerPrice,      // ← NEW
+    upiId,
   } = req.body;
 
   if (kitchenName)         kitchen.kitchenName    = kitchenName;
@@ -102,7 +107,10 @@ export const updateKitchen = asyncHandler(async (req, res) => {
   if (oneMealPrice)        kitchen.oneMealPrice   = Number(oneMealPrice);
   if (twoMealPrice)        kitchen.twoMealPrice   = Number(twoMealPrice);
   if (threeMealPrice)      kitchen.threeMealPrice = Number(threeMealPrice);
-  if (upiId !== undefined) kitchen.upiId          = upiId.trim(); // ← ADDED
+  if (breakfastPrice)      kitchen.breakfastPrice = Number(breakfastPrice); // ← NEW
+  if (lunchPrice)          kitchen.lunchPrice     = Number(lunchPrice);     // ← NEW
+  if (dinnerPrice)         kitchen.dinnerPrice    = Number(dinnerPrice);    // ← NEW
+  if (upiId !== undefined) kitchen.upiId          = upiId.trim();
 
   // ── Re-geocode only if address changed ──
   if (address && address !== kitchen.address) {
@@ -144,7 +152,12 @@ export const deleteKitchen = asyncHandler(async (req, res) => {
 
 export const subscribeKitchen = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
-  const { mealPlan }  = req.body;
+  const { mealPlan, preferredMeal } = req.body;
+
+  // preferredMeal required when mealPlan is "one"
+  if (mealPlan === "one" && !["breakfast", "lunch", "dinner"].includes(preferredMeal)) {
+    throw new AppError("Please select which meal you want (breakfast, lunch, or dinner)", 400);
+  }
 
   const kitchen = await Kitchen.findById(kitchenId).populate("ownerId", "name");
   if (!kitchen) throw new AppError("Kitchen not found", 404);
@@ -155,19 +168,26 @@ export const subscribeKitchen = asyncHandler(async (req, res) => {
   if (exists) return res.status(409).json({ success: false, message: "Already subscribed" });
 
   const subscription = await Subscription.create({
-    userId: req.user.id, kitchenId, mealPlan,
-    startDate: new Date(),
-    endDate:   new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    userId:        req.user.id,
+    kitchenId,
+    mealPlan,
+    preferredMeal: mealPlan === "one" ? preferredMeal : null,
+    startDate:     new Date(),
+    endDate:       new Date(new Date().setMonth(new Date().getMonth() + 1)),
   });
 
   kitchen.currentSubscribers += 1;
   await kitchen.save();
 
+  const mealLabel = mealPlan === "one"
+    ? `1 meal (${preferredMeal})`
+    : `${mealPlan} meal plan`;
+
   await Notification.create({
     recipientId: kitchen.ownerId._id,
     type:        "subscription",
     title:       "🎉 New Subscriber!",
-    message:     `Someone subscribed to ${kitchen.kitchenName} (${mealPlan} meal plan).`,
+    message:     `Someone subscribed to ${kitchen.kitchenName} (${mealLabel}).`,
     kitchenId,
   });
 
@@ -185,10 +205,22 @@ export const unsubscribeKitchen = asyncHandler(async (req, res) => {
   if (!kitchen) throw new AppError("Kitchen not found", 404);
 
   // ── Calculate refund estimate ──────────────────────────────────────────
-  const PRICE_KEY    = { one: "oneMealPrice", two: "twoMealPrice", three: "threeMealPrice" };
-  const MEALS_PER    = { one: 1, two: 2, three: 3 };
-  const monthlyPrice = kitchen[PRICE_KEY[subscription.mealPlan]] || 0;
-  const mealsPerDay  = MEALS_PER[subscription.mealPlan]  || 1;
+  const PRICE_KEY = {
+    breakfast: "breakfastPrice",
+    lunch:     "lunchPrice",
+    dinner:    "dinnerPrice",
+    one:       "dinnerPrice",   // legacy fallback → dinner price
+    two:       "twoMealPrice",
+    three:     "threeMealPrice",
+  };
+  const MEALS_PER = {
+    breakfast: 1, lunch: 1, dinner: 1,
+    one: 1, two: 2, three: 3,
+  };
+
+  const priceField  = PRICE_KEY[subscription.mealPlan] || "oneMealPrice";
+  const monthlyPrice = (kitchen[priceField] || kitchen.oneMealPrice) || 0;
+  const mealsPerDay  = MEALS_PER[subscription.mealPlan] || 1;
 
   const today       = new Date();
   const endOfMonth  = new Date(today.getFullYear(), today.getMonth() + 1, 0);
@@ -198,11 +230,10 @@ export const unsubscribeKitchen = asyncHandler(async (req, res) => {
   const refundEst   = Math.round(dailyRate * daysLeft);
   const mealsLeft   = daysLeft * mealsPerDay;
 
-  const subscriberName = subscription.userId?.name || "A subscriber";
-  // ownerId may be ObjectId or populated object — handle both
+  const subscriberName   = subscription.userId?.name || "A subscriber";
   const ownerRecipientId = kitchen.ownerId?._id ?? kitchen.ownerId;
 
-  // ── Notify owner — wrapped so a notification failure never blocks unsub ──
+  // ── Notify owner ───────────────────────────────────────────────────────
   try {
     await Notification.create({
       recipientId: ownerRecipientId,
@@ -223,7 +254,6 @@ export const unsubscribeKitchen = asyncHandler(async (req, res) => {
       },
     });
   } catch (notifErr) {
-    // Log but don't fail the unsubscription if notification errors
     console.error("[unsubscribe] Notification create failed:", notifErr.message);
   }
 

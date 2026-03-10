@@ -19,6 +19,13 @@ const subscriptionSchema = new mongoose.Schema({
     enum: ["one", "two", "three"],
     required: true,
   },
+  preferredMeal: {
+  type:    String,
+  enum:    ["breakfast", "lunch", "dinner", null],
+  default: null,
+  // Only relevant when mealPlan === "one"
+  // Tells the kitchen which meal to serve this subscriber
+},
 
   startDate: { type: Date, required: true },
   endDate:   { type: Date, required: true },
