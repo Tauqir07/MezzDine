@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "./KitchenMap.css";
+import "./Kitchenmap.css";
 
 // Fix leaflet default icon broken by webpack/vite
 delete L.Icon.Default.prototype._getIconUrl;
