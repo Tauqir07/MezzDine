@@ -1,4 +1,4 @@
-import Kitchen      from "../models/Kitchen.js";
+import Kitchen      from "../models/KitchenModal.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError     from "../utils/AppError.js";
 import cloudinary   from "../config/cloudinary.js";

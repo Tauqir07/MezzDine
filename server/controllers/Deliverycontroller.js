@@ -1,5 +1,5 @@
 import Deliverystatus from "../models/Deliverystatus.js";
-import Kitchen        from "../models/Kitchen.js";
+import Kitchen        from "../models/KitchenModal.js";
 import Notification   from "../models/Notification.js";
 import Subscription   from "../models/Subscription.js";
 import asyncHandler   from "../utils/asyncHandler.js";

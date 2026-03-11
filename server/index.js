@@ -24,7 +24,7 @@ import deliveryRoutes     from "./routes/Deliveryroutes.js";
 import visitRoutes        from "./routes/VisitRoutes.js";
 import paymentRoutes      from "./routes/PaymentRoutes.js";
 
-import Kitchen      from "./models/Kitchen.js";
+import Kitchen      from "./models/KitchenModal.js";
 import Payment      from "./models/Payment.js";
 import Subscription from "./models/Subscription.js";
 import MealPause    from "./models/MealPause.js";

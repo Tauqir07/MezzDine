@@ -1,7 +1,7 @@
 import Payment      from "../models/Payment.js";
 import Subscription from "../models/Subscription.js";
 import MealPause    from "../models/MealPause.js";
-import Kitchen      from "../models/Kitchen.js";
+import Kitchen      from "../models/KitchenModal.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError     from "../utils/AppError.js";
 
