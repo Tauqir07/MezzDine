@@ -7,7 +7,7 @@ import Deliverystatuspanel from "../map/Deliverystatuspanel";
 import Pausepanel          from "../Notification/Pausepanel";
 import VisitStats          from "../components/VisitStats/VisitStats";
 import PaymentStatusBadge  from "../components/PaymentStatusBadge/PaymentStatusBadge";
-import UpiSettings         from "../components/PaymentModal/UpiSettings";
+import UpiSettings         from "../components/PaymentModals/UpiSettings";
 import PageLoader from "../components/PageLoader";
 
 const MEAL_SCHEDULE = [

@@ -5,7 +5,7 @@ import Kitchenmap from "../map/Kitchenmap";
 import Deliverytracker from "../map/Deliverytracker";
 import PageLoader from "../components/PageLoader";
 import Pausepanel from "../Notification/Pausepanel";
-import PaymentModal from "../components/PaymentModal/PaymentModal";
+import PaymentModal from "../components/PaymentModals/PaymentModal";
 import "./UserDashboard.css";
 
 const MEAL_PLAN_LABEL = {
