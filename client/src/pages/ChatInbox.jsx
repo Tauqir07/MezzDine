@@ -4,6 +4,7 @@ import { getConversations, getMessages } from "../api/chat";
 import { useAuth } from "../context/authContext";
 import socket from "../socket";
 import "./ChatInbox.css";
+import PageLoader from "../components/PageLoader";
 
 // ── Pure helpers ──────────────────────────────────────────────────────────────
 
@@ -75,6 +76,7 @@ export default function ChatInbox() {
   useEffect(() => {
     const myId = String(user._id);
     socket.emit("join", myId);
+
 
     function handleNewMessage(msg) {
       const senderId = msg.sender?._id
@@ -165,7 +167,7 @@ export default function ChatInbox() {
   const totalUnread  = Object.values(unread).reduce((sum, v) => sum + (v?.count || 0), 0);
   const activeConvo  = convos.find(c => c._id === activeId);
   const activeOther  = activeConvo?.participants?.find(p => String(p._id) !== String(user._id));
-
+if (loading) return <PageLoader />;
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (

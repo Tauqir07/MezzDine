@@ -8,6 +8,7 @@ import Pausepanel          from "../Notification/Pausepanel";
 import VisitStats          from "../components/VisitStats/VisitStats";
 import PaymentStatusBadge  from "../components/PaymentStatusBadge/PaymentStatusBadge";
 import UpiSettings         from "../components/PaymentModal/UpiSettings";
+import PageLoader from "../components/PageLoader";
 
 const MEAL_SCHEDULE = [
   { meal: "breakfast", label: "Breakfast", icon: "🌅", start: 0,  end: 8  },
@@ -47,6 +48,27 @@ const MEAL_PLAN_LABEL = {
   three: "3 Meals / Day"
 };
 
+// ── Reusable collapsible section ──
+function CollapsibleSection({ title, badge, badgeColor, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="kdash-section">
+      <button className="kdash-collapsible-header" onClick={() => setOpen(o => !o)}>
+        <h2 className="kdash-section-title" style={{ margin: 0 }}>
+          {title}
+          {badge != null && badge > 0 && (
+            <span className="kdash-collapsible-badge" style={{ background: badgeColor || "#6b7280" }}>
+              {badge}
+            </span>
+          )}
+        </h2>
+        <span className="kdash-collapsible-arrow">{open ? "▲" : "▼"}</span>
+      </button>
+      {open && <div className="kdash-collapsible-body">{children}</div>}
+    </div>
+  );
+}
+
 export default function KitchenDashboard() {
 
   const { kitchenId } = useParams();
@@ -58,29 +80,29 @@ export default function KitchenDashboard() {
   const [activeTab,      setActiveTab]      = useState("all");
   const [now,            setNow]            = useState(new Date());
   const [paymentData,    setPaymentData]    = useState([]);
-  const [billGenLoading,  setBillGenLoading]  = useState(false);
-  const [billGenMsg,      setBillGenMsg]      = useState("");
-  const [unsubNotifs,     setUnsubNotifs]     = useState([]);
+  const [billGenLoading, setBillGenLoading] = useState(false);
+  const [billGenMsg,     setBillGenMsg]     = useState("");
+  const [unsubNotifs,    setUnsubNotifs]    = useState([]);
 
-  // ── Moved inside component so it can access paymentData state ──
+  const [pendingPayments,  setPendingPayments]  = useState([]);
+  const [pendingLoading,   setPendingLoading]   = useState(false);
+  const [approveLoadingId, setApproveLoadingId] = useState(null);
+  const [rejectLoadingId,  setRejectLoadingId]  = useState(null);
+
   function getPaymentInfo(userId) {
     return paymentData.find(p => String(p.userId) === String(userId));
   }
 
-  /* live clock */
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(t);
   }, []);
 
-  /* fetch subscribers + menu + kitchen */
   async function fetchKitchen() {
     try {
       const res = await api.get(`/kitchens/${kitchenId}`);
       setKitchen(res.data.data || null);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   }
 
   useEffect(() => {
@@ -94,42 +116,66 @@ export default function KitchenDashboard() {
         setSubscribers(subRes.data.data  || []);
         setMenu(menuRes.data.data        || null);
         setKitchen(kitchenRes.data.data  || null);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     }
     load();
   }, [kitchenId]);
 
-  /* fetch payment status for all subscribers */
   useEffect(() => {
     api.get(`/payments/kitchen/${kitchenId}`)
       .then(res => setPaymentData(res.data.data || []))
       .catch(() => {});
   }, [kitchenId]);
 
-  /* generate monthly bills manually */
+  async function fetchPendingPayments() {
+    setPendingLoading(true);
+    try {
+      const res = await api.get(`/payments/pending/${kitchenId}`);
+      setPendingPayments(res.data.data || []);
+    } catch { setPendingPayments([]); }
+    finally { setPendingLoading(false); }
+  }
+
+  useEffect(() => { fetchPendingPayments(); }, [kitchenId]);
+
+  async function approvePayment(paymentId) {
+    setApproveLoadingId(paymentId);
+    try {
+      await api.patch(`/payments/mark-paid/${paymentId}`);
+      await fetchPendingPayments();
+      refetchPayments();
+      const subRes = await api.get(`/subscriptions/kitchen/${kitchenId}`);
+      setSubscribers(subRes.data.data || []);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to approve payment");
+    } finally { setApproveLoadingId(null); }
+  }
+
+  async function rejectPayment(paymentId) {
+    setRejectLoadingId(paymentId);
+    try {
+      await api.patch(`/payments/reject/${paymentId}`);
+      await fetchPendingPayments();
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to reject payment");
+    } finally { setRejectLoadingId(null); }
+  }
+
   async function generateBills() {
-    setBillGenLoading(true);
-    setBillGenMsg("");
+    setBillGenLoading(true); setBillGenMsg("");
     try {
       const res = await api.post(`/payments/generate/${kitchenId}`);
       setBillGenMsg(`✅ Bills generated for ${res.data.generated ?? "all"} subscribers`);
     } catch (err) {
       setBillGenMsg("❌ " + (err.response?.data?.message || "Failed to generate bills"));
-    } finally {
-      setBillGenLoading(false);
-    }
+    } finally { setBillGenLoading(false); }
   }
 
-  /* fetch unsubscription notifications for this kitchen */
   useEffect(() => {
-    api.get(`/notifications?type=unsubscription&kitchenId=${kitchenId}`)
+    api.get(`/notifications/my`)
       .then(res => {
-        const all = res.data.data || [];
-        // filter to this kitchen only (backend may return all owner notifs)
+        const all = res.data.data?.notifications || [];
         setUnsubNotifs(
           all.filter(n => n.type === "unsubscription" &&
             String(n.kitchenId?._id || n.kitchenId) === String(kitchenId))
@@ -147,24 +193,15 @@ export default function KitchenDashboard() {
   const currentMeal  = getMealOfHour(currentHour);
   const todayName    = getDayName(0);
   const tomorrowName = getDayName(1);
-
   const todayDays    = menu?.weeks?.[0]?.days || [];
   const todayData    = todayDays.find(d => d.day === todayName);
   const tomorrowData = todayDays.find(d => d.day === tomorrowName);
+  const pausedList   = subscribers.filter(s => s.isPaused);
+  const activeList   = subscribers.filter(s => !s.isPaused);
+  const displayList  = activeTab === "paused" ? pausedList : activeTab === "active" ? activeList : subscribers;
+  const unreadUnsubs = unsubNotifs.filter(n => !n.isRead).length;
 
-  const pausedList = subscribers.filter(s => s.isPaused);
-  const activeList = subscribers.filter(s => !s.isPaused);
-
-  const displayList =
-    activeTab === "paused" ? pausedList :
-    activeTab === "active" ? activeList : subscribers;
-
-  if (loading) return (
-    <div className="kd-loading">
-      <div className="kd-spinner" />
-      <p>Loading dashboard…</p>
-    </div>
-  );
+  if (loading) return <PageLoader />;
 
   return (
     <div className="kdash-page">
@@ -192,8 +229,65 @@ export default function KitchenDashboard() {
             <span className="kdash-stat-num">{pausedList.length}</span>
             <span className="kdash-stat-label">Paused</span>
           </div>
+          {pendingPayments.length > 0 && (
+            <div className="kdash-stat kdash-stat--pending">
+              <span className="kdash-stat-num">{pendingPayments.length}</span>
+              <span className="kdash-stat-label">Pending</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* ── ⏳ Pending Approvals — always visible ── */}
+      {(pendingPayments.length > 0 || pendingLoading) && (
+        <div className="kdash-section kdash-pending-section">
+          <h2 className="kdash-section-title">
+            ⏳ Pending Approvals
+            {pendingPayments.length > 0 && (
+              <span className="kdash-pending-count">{pendingPayments.length}</span>
+            )}
+          </h2>
+          {pendingLoading ? <p className="kdash-empty">Loading...</p> : (
+            <div className="kdash-pending-list">
+              {pendingPayments.map(payment => (
+                <div key={payment._id} className="kdash-pending-card">
+                  <div className="kdash-pending-top">
+                    <div className="kdash-avatar">{payment.userId?.name?.[0]?.toUpperCase() || "?"}</div>
+                    <div className="kdash-pending-info">
+                      <div className="kdash-pending-name">{payment.userId?.name || "Unknown"}</div>
+                      <div className="kdash-pending-contact">
+                        {payment.userId?.phone && <span>📞 {payment.userId.phone}</span>}
+                        {payment.userId?.email && <span>✉️ {payment.userId.email}</span>}
+                      </div>
+                    </div>
+                    <div className={`kdash-pending-status ${payment.status === "submitted" ? "kdash-pending-status--submitted" : "kdash-pending-status--waiting"}`}>
+                      {payment.status === "submitted" ? "UTR Submitted" : "Awaiting UTR"}
+                    </div>
+                  </div>
+                  <div className="kdash-pending-details">
+                    <div className="kdash-pending-detail"><span>Plan</span><strong>{MEAL_PLAN_LABEL[payment.mealPlan] || payment.mealPlan || "—"}</strong></div>
+                    <div className="kdash-pending-detail"><span>Amount</span><strong>₹{payment.finalAmount || payment.totalAmount || 0}</strong></div>
+                    <div className="kdash-pending-detail"><span>Month</span><strong>{payment.month || "—"}</strong></div>
+                    {payment.utrNumber && <div className="kdash-pending-detail"><span>UTR</span><strong className="kdash-pending-utr">{payment.utrNumber}</strong></div>}
+                    {payment.paymentNote && <div className="kdash-pending-detail kdash-pending-detail--full"><span>Note</span><strong>{payment.paymentNote}</strong></div>}
+                    <div className="kdash-pending-detail"><span>Submitted</span><strong>{formatDate(payment.updatedAt || payment.createdAt)}</strong></div>
+                  </div>
+                  {payment.status === "submitted" && (
+                    <div className="kdash-pending-actions">
+                      <button className="kdash-approve-btn" onClick={() => approvePayment(payment._id)} disabled={approveLoadingId === payment._id}>
+                        {approveLoadingId === payment._id ? "Approving…" : "✅ Approve"}
+                      </button>
+                      <button className="kdash-reject-btn" onClick={() => rejectPayment(payment._id)} disabled={rejectLoadingId === payment._id}>
+                        {rejectLoadingId === payment._id ? "Rejecting…" : "❌ Reject"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Delivery Status Panel ── */}
       <div className="kdash-section">
@@ -201,7 +295,10 @@ export default function KitchenDashboard() {
         <Deliverystatuspanel kitchenId={kitchenId} />
       </div>
 
-      <Pausepanel kitchenId={kitchenId} isOwner={true} />
+      {/* ── ⏸ Pause Kitchen — collapsible ── */}
+      <CollapsibleSection title="⏸ Pause Kitchen Service">
+        <Pausepanel kitchenId={kitchenId} isOwner={true} />
+      </CollapsibleSection>
 
       {/* ── Subscribers Map ── */}
       <div className="kdash-section">
@@ -230,12 +327,8 @@ export default function KitchenDashboard() {
                   {end > 12 ? `${end - 12} PM` : `${end} AM`}
                 </div>
                 <div className="kdash-slot-label">{label}</div>
-                {mealData?.image?.url && (
-                  <img src={mealData.image.url} className="kdash-slot-img" alt={label} />
-                )}
-                <div className="kdash-slot-name">
-                  {mealData?.name || <span className="kdash-slot-empty">Not set</span>}
-                </div>
+                {mealData?.image?.url && <img src={mealData.image.url} className="kdash-slot-img" alt={label} />}
+                <div className="kdash-slot-name">{mealData?.name || <span className="kdash-slot-empty">Not set</span>}</div>
                 {isActive && <div className="kdash-slot-badge">Serving Now</div>}
               </div>
             );
@@ -253,12 +346,8 @@ export default function KitchenDashboard() {
               return (
                 <div key={meal} className="kdash-slot">
                   <div className="kdash-slot-label">{icon} {label}</div>
-                  {mealData?.image?.url && (
-                    <img src={mealData.image.url} className="kdash-slot-img" alt={label} />
-                  )}
-                  <div className="kdash-slot-name">
-                    {mealData?.name || <span className="kdash-slot-empty">Not set</span>}
-                  </div>
+                  {mealData?.image?.url && <img src={mealData.image.url} className="kdash-slot-img" alt={label} />}
+                  <div className="kdash-slot-name">{mealData?.name || <span className="kdash-slot-empty">Not set</span>}</div>
                 </div>
               );
             })}
@@ -272,17 +361,12 @@ export default function KitchenDashboard() {
           <h2 className="kdash-section-title">Subscribers</h2>
           <div className="kdash-tabs">
             {["all", "active", "paused"].map(tab => (
-              <button
-                key={tab}
-                className={`kdash-tab ${activeTab === tab ? "kdash-tab--active" : ""}`}
-                onClick={() => setActiveTab(tab)}
-              >
+              <button key={tab} className={`kdash-tab ${activeTab === tab ? "kdash-tab--active" : ""}`} onClick={() => setActiveTab(tab)}>
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
         </div>
-
         {displayList.length === 0 ? (
           <p className="kdash-empty">No subscribers in this category.</p>
         ) : (
@@ -292,94 +376,35 @@ export default function KitchenDashboard() {
               const urgent = left !== null && left <= 5;
               const info   = getPaymentInfo(sub.userId?._id);
               return (
-                <div
-                  key={sub._id}
-                  className={`kdash-card ${sub.isPaused ? "kdash-card--paused" : ""}`}
-                >
+                <div key={sub._id} className={`kdash-card ${sub.isPaused ? "kdash-card--paused" : ""}`}>
                   <div className="kdash-card-top">
-                    <div className="kdash-avatar">
-                      {sub.userId?.name?.[0]?.toUpperCase() || "?"}
-                    </div>
+                    <div className="kdash-avatar">{sub.userId?.name?.[0]?.toUpperCase() || "?"}</div>
                     <div>
                       <div className="kdash-card-name">{sub.userId?.name || "Unknown"}</div>
-                      <div className="kdash-card-phone">
-                        {sub.userId?.phone || sub.userId?.email || "—"}
-                      </div>
+                      <div className="kdash-card-phone">{sub.userId?.phone || sub.userId?.email || "—"}</div>
                     </div>
                     <div className={`kdash-badge ${sub.isPaused ? "kdash-badge--paused" : "kdash-badge--active"}`}>
                       {sub.isPaused ? "⏸ Paused" : "✓ Active"}
                     </div>
                   </div>
-
                   <div className="kdash-card-row">
-                    <div className="kdash-card-cell">
-                      <span className="kdash-cell-label">Started</span>
-                      <span className="kdash-cell-val">{formatDate(sub.startDate)}</span>
-                    </div>
-                    <div className="kdash-card-cell">
-                      <span className="kdash-cell-label">Ends</span>
-                      <span className={`kdash-cell-val ${urgent ? "kdash-cell-urgent" : ""}`}>
-                        {formatDate(sub.endDate)}
-                      </span>
-                    </div>
-                    <div className="kdash-card-cell">
-                      <span className="kdash-cell-label">Days Left</span>
-                      <span className={`kdash-cell-val ${urgent ? "kdash-cell-urgent" : ""}`}>
-                        {left !== null ? `${left}d` : "—"}
-                      </span>
-                    </div>
+                    <div className="kdash-card-cell"><span className="kdash-cell-label">Started</span><span className="kdash-cell-val">{formatDate(sub.startDate)}</span></div>
+                    <div className="kdash-card-cell"><span className="kdash-cell-label">Ends</span><span className={`kdash-cell-val ${urgent ? "kdash-cell-urgent" : ""}`}>{formatDate(sub.endDate)}</span></div>
+                    <div className="kdash-card-cell"><span className="kdash-cell-label">Days Left</span><span className={`kdash-cell-val ${urgent ? "kdash-cell-urgent" : ""}`}>{left !== null ? `${left}d` : "—"}</span></div>
                   </div>
-
                   <div className="kdash-card-row">
-                    <div className="kdash-card-cell">
-                      <span className="kdash-cell-label">Meal Plan</span>
-                      <span className="kdash-cell-val">
-                        {MEAL_PLAN_LABEL[sub.mealPlan] || sub.mealPlan || "—"}
-                      </span>
-                    </div>
+                    <div className="kdash-card-cell"><span className="kdash-cell-label">Meal Plan</span><span className="kdash-cell-val">{MEAL_PLAN_LABEL[sub.mealPlan] || sub.mealPlan || "—"}</span></div>
                     {sub.isPaused && sub.pausedAt && (
-                      <div className="kdash-card-cell">
-                        <span className="kdash-cell-label">Paused On</span>
-                        <span className="kdash-cell-val kdash-cell-urgent">
-                          {formatDate(sub.pausedAt)}
-                        </span>
-                      </div>
+                      <div className="kdash-card-cell"><span className="kdash-cell-label">Paused On</span><span className="kdash-cell-val kdash-cell-urgent">{formatDate(sub.pausedAt)}</span></div>
                     )}
                   </div>
-
                   {left !== null && (
                     <div className="kdash-bar-wrap">
-                      <div
-                        className="kdash-bar-fill"
-                        style={{
-                          width: `${Math.min(100, (left / 30) * 100)}%`,
-                          background: urgent ? "#ef4444" : "#22c55e"
-                        }}
-                      />
+                      <div className="kdash-bar-fill" style={{ width: `${Math.min(100, (left / 30) * 100)}%`, background: urgent ? "#ef4444" : "#22c55e" }} />
                     </div>
                   )}
-
-                  {/* ── Per-subscriber pause history ── */}
-                  {sub.userId?._id && (
-                    <Pausepanel
-                      kitchenId={kitchenId}
-                      userId={sub.userId._id}
-                      userName={sub.userId?.name}
-                    />
-                  )}
-
-                  {/* ── Payment status badge ── */}
-                  {info && (
-                    <PaymentStatusBadge
-                      userId={sub.userId._id}
-                      kitchenId={kitchenId}
-                      unpaidMonths={info.unpaidMonths}
-                      paymentColor={info.paymentColor}
-                      latestPayment={info.latestPayment}
-                      onMarkedPaid={refetchPayments}
-                    />
-                  )}
-
+                  {sub.userId?._id && <Pausepanel kitchenId={kitchenId} userId={sub.userId._id} userName={sub.userId?.name} />}
+                  {info && <PaymentStatusBadge userId={sub.userId._id} kitchenId={kitchenId} unpaidMonths={info.unpaidMonths} paymentColor={info.paymentColor} latestPayment={info.latestPayment} onMarkedPaid={refetchPayments} />}
                 </div>
               );
             })}
@@ -387,68 +412,41 @@ export default function KitchenDashboard() {
         )}
       </div>
 
-      {/* ── 👋 Recent Unsubscriptions ── */}
+      {/* ── 👋 Recent Unsubscriptions — collapsible ── */}
       {unsubNotifs.length > 0 && (
-        <div className="kdash-section">
-          <h2 className="kdash-section-title">👋 Recent Unsubscriptions</h2>
+        <CollapsibleSection title="👋 Recent Unsubscriptions" badge={unreadUnsubs} badgeColor="#ef4444">
           <div className="kdash-unsub-list">
             {unsubNotifs.map(n => (
               <div key={n._id} className={`kdash-unsub-card ${n.isRead ? "" : "kdash-unsub-card--unread"}`}>
                 <div className="kdash-unsub-top">
-                  <div className="kdash-unsub-avatar">
-                    {n.meta?.subscriberName?.[0]?.toUpperCase() || "?"}
-                  </div>
+                  <div className="kdash-unsub-avatar">{n.meta?.subscriberName?.[0]?.toUpperCase() || "?"}</div>
                   <div className="kdash-unsub-info">
                     <div className="kdash-unsub-name">{n.meta?.subscriberName || "Subscriber"}</div>
                     <div className="kdash-unsub-time">
-                      {new Date(n.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric", month: "short", hour: "2-digit", minute: "2-digit"
-                      })}
+                      {new Date(n.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                     </div>
                   </div>
                   {!n.isRead && <span className="kdash-unsub-new">New</span>}
                 </div>
                 <div className="kdash-unsub-stats">
-                  <div className="kdash-unsub-stat">
-                    <span>Plan</span>
-                    <strong>{n.meta?.mealPlan ? `${n.meta.mealPlan} meal` : "—"}</strong>
-                  </div>
-                  <div className="kdash-unsub-stat">
-                    <span>Days left</span>
-                    <strong>{n.meta?.daysLeft ?? "—"}d</strong>
-                  </div>
-                  <div className="kdash-unsub-stat">
-                    <span>Meals missed</span>
-                    <strong>{n.meta?.mealsLeft ?? "—"}</strong>
-                  </div>
-                  <div className="kdash-unsub-stat kdash-unsub-stat--refund">
-                    <span>Est. refund</span>
-                    <strong>₹{n.meta?.refundEst ?? 0}</strong>
-                  </div>
+                  <div className="kdash-unsub-stat"><span>Plan</span><strong>{n.meta?.mealPlan ? `${n.meta.mealPlan} meal` : "—"}</strong></div>
+                  <div className="kdash-unsub-stat"><span>Days left</span><strong>{n.meta?.daysLeft ?? "—"}d</strong></div>
+                  <div className="kdash-unsub-stat"><span>Meals missed</span><strong>{n.meta?.mealsLeft ?? "—"}</strong></div>
+                  <div className="kdash-unsub-stat kdash-unsub-stat--refund"><span>Est. refund</span><strong>₹{n.meta?.refundEst ?? 0}</strong></div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </CollapsibleSection>
       )}
 
-      {/* ── 💳 Payment Settings + Generate Bills ── */}
+      {/* ── 💳 Payment Settings ── */}
       <div className="kdash-section">
         <h2 className="kdash-section-title">💳 Payment Settings</h2>
-        <UpiSettings
-          kitchenId={kitchenId}
-          currentUpi={kitchen?.upiId || ""}
-          onSaved={() => fetchKitchen()}
-        />
+        <UpiSettings kitchenId={kitchenId} currentUpi={kitchen?.upiId || ""} onSaved={() => fetchKitchen()} />
         <div className="kdash-bill-gen">
-          <p className="kdash-bill-gen-desc">
-            Generate bills for all subscribers for the current month. The cron job does this automatically on the 1st — use this to trigger manually.
-          </p>
-          <button
-            className="kdash-generate-btn"
-            onClick={generateBills}
-            disabled={billGenLoading}
-          >
+          <p className="kdash-bill-gen-desc">Generate bills for all subscribers for the current month. The cron job does this automatically on the 1st — use this to trigger manually.</p>
+          <button className="kdash-generate-btn" onClick={generateBills} disabled={billGenLoading}>
             {billGenLoading ? "Generating…" : "🧾 Generate Monthly Bills"}
           </button>
           {billGenMsg && <p className="kdash-bill-msg">{billGenMsg}</p>}
@@ -458,11 +456,7 @@ export default function KitchenDashboard() {
       {/* ── Visitor Stats ── */}
       <div className="kdash-section">
         <h2 className="kdash-section-title">👁 Visitor Stats</h2>
-        <VisitStats
-          entityType="kitchen"
-          entityId={kitchenId}
-          ownerId={kitchen?.ownerId}
-        />
+        <VisitStats entityType="kitchen" entityId={kitchenId} ownerId={kitchen?.ownerId} />
       </div>
 
     </div>

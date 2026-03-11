@@ -103,7 +103,7 @@ export default function AvailableRooms() {
       || !room.genderPreference;
 
     // ── NEW: roommate — show only rooms tagged as roommate listings
-    const matchesRoommate = !roommateOnly || room.isRoommate === true;
+    const matchesRoommate = !roommateOnly || room.listingType === "roommate";
 
     return (
       matchesSearch && matchesMinPrice && matchesMaxPrice &&
@@ -188,7 +188,7 @@ export default function AvailableRooms() {
                     <img src={room.images[0].url} alt={room.title} className="ar-card__image" />
                     {/* ── Room type badges on image ── */}
                     <div className="ar-card__badges">
-                      {room.isRoommate && (
+                      {room.listingType === "roommate" && (
                         <span className="ar-card__badge ar-card__badge--roommate">🤝 Roommate</span>
                       )}
                       {room.genderPreference && room.genderPreference !== "any" && (

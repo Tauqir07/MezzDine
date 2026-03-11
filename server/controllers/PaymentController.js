@@ -9,50 +9,42 @@ const MEALS_PER_PLAN = {
   breakfast: 1,
   lunch:     1,
   dinner:    1,
-  one:       1, // legacy: dinner only
+  one:       1,
   two:       2,
   three:     3,
 };
 
-// ── Meal cutoff times (24hr) ──────────────────────────────────────────────────
-// Breakfast served:  before 6:00 AM cutoff
-// Lunch served:      before 11:00 AM cutoff
-// Dinner served:     before 6:00 PM cutoff
-const CUT_BREAKFAST =  6; // subscribe before 6 AM  → get breakfast today
-const CUT_LUNCH     = 11; // subscribe before 11 AM → get lunch today
-const CUT_DINNER    = 18; // subscribe before 6 PM  → get dinner today, after → next day
+const CUT_BREAKFAST =  6;
+const CUT_LUNCH     = 11;
+const CUT_DINNER    = 18;
 
-// ── Helper: how many meals on the subscription START day based on signup time ─
-// preferredMeal is only used when mealPlan === "one"
 function mealsOnFirstDay(mealPlan, subscribeHour, preferredMeal) {
   if (mealPlan === "one") {
-    // Use the customer's chosen meal time
-    const meal = preferredMeal || "dinner"; // default to dinner if not set
+    const meal = preferredMeal || "dinner";
     if (meal === "breakfast") return subscribeHour < CUT_BREAKFAST ? 1 : 0;
     if (meal === "lunch")     return subscribeHour < CUT_LUNCH     ? 1 : 0;
     if (meal === "dinner")    return subscribeHour < CUT_DINNER    ? 1 : 0;
   }
   if (mealPlan === "three") {
-    if (subscribeHour < CUT_BREAKFAST) return 3; // all 3
-    if (subscribeHour < CUT_LUNCH)     return 2; // lunch + dinner
-    if (subscribeHour < CUT_DINNER)    return 1; // dinner only
+    if (subscribeHour < CUT_BREAKFAST) return 3;
+    if (subscribeHour < CUT_LUNCH)     return 2;
+    if (subscribeHour < CUT_DINNER)    return 1;
     return 0;
   }
   if (mealPlan === "two") {
-    if (subscribeHour < CUT_LUNCH)  return 2; // lunch + dinner
-    if (subscribeHour < CUT_DINNER) return 1; // dinner only
+    if (subscribeHour < CUT_LUNCH)  return 2;
+    if (subscribeHour < CUT_DINNER) return 1;
     return 0;
   }
   return 0;
 }
 
-// ── Helper: price per meal ────────────────────────────────────────────────────
 function pricePerMeal(kitchen, mealPlan) {
   const priceMap = {
     breakfast: kitchen.breakfastPrice,
     lunch:     kitchen.lunchPrice,
     dinner:    kitchen.dinnerPrice,
-    one:       kitchen.dinnerPrice || kitchen.oneMealPrice, // legacy fallback
+    one:       kitchen.dinnerPrice || kitchen.oneMealPrice,
     two:       kitchen.twoMealPrice,
     three:     kitchen.threeMealPrice,
   };
@@ -66,27 +58,23 @@ function pricePerMeal(kitchen, mealPlan) {
   return monthly / (daysInMonth * mealsPerDay);
 }
 
-// ── Helper: get current YYYY-MM ───────────────────────────────────────────────
 function currentMonth() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 }
 
-// ── Helper: how many paused meals in a given month (past dates only) ─────────
 async function pausedMealsInMonth(userId, kitchenId, month, mealsPerDay) {
   const [year, mon] = month.split("-").map(Number);
   const start       = new Date(year, mon - 1, 1);
-  const end         = new Date(year, mon, 0); // last day of month
+  const end         = new Date(year, mon, 0);
 
-  // Only count up to yesterday — upcoming pauses don't affect current bill
   const today    = new Date();
   today.setHours(0, 0, 0, 0);
-  const cutoff   = new Date(today.getTime() - 1); // end of yesterday
+  const cutoff   = new Date(today.getTime() - 1);
 
   const pause    = await MealPause.findOne({ userId, kitchenId });
   const dates    = pause?.dates || [];
 
-  // Filter: must be within this month AND already happened (not today or future)
   const inMonth = dates.filter(d => {
     const date = new Date(d);
     date.setHours(0, 0, 0, 0);
@@ -96,7 +84,6 @@ async function pausedMealsInMonth(userId, kitchenId, month, mealsPerDay) {
   return inMonth.length * mealsPerDay;
 }
 
-// ── Helper: count months with unpaid/pending bills ───────────────────────────
 async function unpaidMonthsCount(userId, kitchenId) {
   const unpaid = await Payment.countDocuments({
     userId,
@@ -107,11 +94,6 @@ async function unpaidMonthsCount(userId, kitchenId) {
   return unpaid;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   GET /payments/bill/:kitchenId
-   Returns the current month's bill for the logged-in customer
-   Always charges only for days consumed so far (not full month)
-───────────────────────────────────────────────────────────────────────────── */
 export const getMyBill = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
 
@@ -140,7 +122,6 @@ export const getMyBill = asyncHandler(async (req, res) => {
   const dayOfMonth  = now.getDate();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
-  // ── Subscription start logic ─────────────────────────────────────────────
   const subStart        = new Date(sub.createdAt);
   const subMonth        = `${subStart.getFullYear()}-${String(subStart.getMonth() + 1).padStart(2, "0")}`;
   const isFirstSubMonth = subMonth === month;
@@ -149,23 +130,14 @@ export const getMyBill = asyncHandler(async (req, res) => {
   let daysConsumed;
 
   if (isFirstSubMonth) {
-    const startDay     = subStart.getDate();
-    const subHour      = subStart.getHours(); // local hour of subscription
-
-    // Meals on the actual subscription day (partial — depends on signup time)
+    const startDay      = subStart.getDate();
+    const subHour       = subStart.getHours();
     const firstDayMeals = mealsOnFirstDay(sub.mealPlan, subHour, sub.preferredMeal);
-
-    // If they signed up after all cutoffs (e.g. 11pm), first day = 0 meals
-    // so effectively their plan starts from next day
     const effectiveStartDay = firstDayMeals === 0 ? startDay + 1 : startDay;
-
-    // Full days after the start day up to today
     const fullDaysAfter = Math.max(0, dayOfMonth - effectiveStartDay);
-
-    daysConsumed  = Math.max(0, dayOfMonth - startDay + 1);
+    daysConsumed   = Math.max(0, dayOfMonth - startDay + 1);
     mealsDelivered = firstDayMeals + (fullDaysAfter * mealsPerDay);
   } else {
-    // Subscribed in a previous month — charge full days this month
     daysConsumed   = dayOfMonth;
     mealsDelivered = dayOfMonth * mealsPerDay;
   }
@@ -174,14 +146,10 @@ export const getMyBill = asyncHandler(async (req, res) => {
   const pausedMeals    = await pausedMealsInMonth(req.user.id, kitchenId, month, mealsPerDay);
   const mealsCharged   = Math.max(0, mealsDelivered - pausedMeals);
   const pauseDeduct    = Math.round(pausedMeals * mealRate);
-
-  const totalAmount = Math.round(mealsDelivered * mealRate);  // before pause deduction
-  const finalAmount = Math.round(mealsCharged   * mealRate);  // actual due
-
-  // Full month projection (reference only — shown as "monthly price")
+  const totalAmount    = Math.round(mealsDelivered * mealRate);
+  const finalAmount    = Math.round(mealsCharged   * mealRate);
   const projectedMonthly = Math.round(daysInMonth * mealsPerDay * mealRate);
 
-  // Check if already has a payment record this month
   const existing = await Payment.findOne({
     userId: req.user.id, kitchenId, month, type: "monthly",
   });
@@ -191,15 +159,15 @@ export const getMyBill = asyncHandler(async (req, res) => {
     data: {
       month,
       mealPlan:          sub.mealPlan,
-      monthlyPrice,                      // plan's flat price (for reference)
-      projectedMonthly,                  // what full month would cost at daily rate
-      daysConsumed,                      // days since subscription started
+      monthlyPrice,
+      projectedMonthly,
+      daysConsumed,
       daysInMonth,
       mealsDelivered,
       pausedMeals,
       pauseDeduction:    pauseDeduct,
-      totalAmount,                       // mealsDelivered × rate (before pauses)
-      finalAmount,                       // actual due = mealsCharged × rate
+      totalAmount,
+      finalAmount,
       status:            existing?.status || "not_generated",
       paymentId:         existing?._id   || null,
       upiId:             kitchen.upiId   || null,
@@ -207,16 +175,14 @@ export const getMyBill = asyncHandler(async (req, res) => {
     },
   });
 });
+
 /* ─────────────────────────────────────────────────────────────────────────────
    POST /payments/advance/:kitchenId
-   Called right after subscribe — creates the advance payment record
-   Customer then submits UTR via PATCH /payments/pay/:paymentId
+   CHANGE 1: saves mealPlan + preferredMeal so owner approval can create sub
 ───────────────────────────────────────────────────────────────────────────── */
 export const createAdvancePayment = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
-
-  // mealPlan can come from body (pre-subscribe flow) or existing subscription
-  const { mealPlan: mealPlanFromBody } = req.body;
+  const { mealPlan: mealPlanFromBody, preferredMeal } = req.body; // ← added preferredMeal
 
   const [kitchen, sub] = await Promise.all([
     Kitchen.findById(kitchenId),
@@ -225,20 +191,29 @@ export const createAdvancePayment = asyncHandler(async (req, res) => {
 
   if (!kitchen) throw new AppError("Kitchen not found", 404);
 
-  // Accept mealPlan from body when subscription doesn't exist yet (pay-first flow)
   const mealPlan = sub?.mealPlan || mealPlanFromBody;
   if (!mealPlan) throw new AppError("Meal plan required", 400);
 
   const month = currentMonth();
 
-  // Idempotent — return existing record if already created
   const existing = await Payment.findOne({
-    userId: req.user.id,
-    kitchenId,
-    month,
-    type: "advance",
-  });
-  if (existing) return res.json({ success: true, data: existing });
+  userId: req.user.id,
+  kitchenId,
+  month,
+  type: "advance",
+});
+
+if (existing) {
+  if (existing.status === "paid") {
+    existing.status      = "pending";
+    existing.utrNumber   = "";
+    existing.paymentNote = "";
+    existing.mealPlan      = mealPlan;       // ← update with new plan
+    existing.preferredMeal = preferredMeal || null;
+     await existing.save();
+}
+  return res.json({ success: true, data: existing });
+}
 
   const priceMap = {
     breakfast: kitchen.breakfastPrice,
@@ -253,22 +228,19 @@ export const createAdvancePayment = asyncHandler(async (req, res) => {
 
   const payment = await Payment.create({
     kitchenId,
-    userId:      req.user.id,
+    userId:        req.user.id,
     month,
-    type:        "advance",
-    totalAmount: amount,
-    finalAmount: amount,
-    status:      "pending",
+    type:          "advance",
+    mealPlan,                             // ← CHANGE 1a: save mealPlan
+    preferredMeal: preferredMeal || null, // ← CHANGE 1b: save preferredMeal
+    totalAmount:   amount,
+    finalAmount:   amount,
+    status:        "pending",
   });
 
   res.status(201).json({ success: true, data: payment });
 });
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   POST /payments/generate/:kitchenId
-   Owner generates monthly bills for ALL subscribers at start of month
-   Or customer can trigger their own bill generation
-───────────────────────────────────────────────────────────────────────────── */
 export const generateMonthlyBill = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
   const month         = currentMonth();
@@ -291,7 +263,6 @@ export const generateMonthlyBill = asyncHandler(async (req, res) => {
   const results = [];
 
   for (const sub of subs) {
-    // Skip if already generated
     const exists = await Payment.findOne({
       userId: sub.userId, kitchenId, month, type: "monthly",
     });
@@ -304,12 +275,10 @@ export const generateMonthlyBill = asyncHandler(async (req, res) => {
     const pauseDeduct  = Math.round(pausedMeals * mealRate);
     const finalAmount  = Math.max(0, monthlyPrice - pauseDeduct);
 
-    // First month — deduct advance from bill
     const advancePaid = await Payment.findOne({
       userId: sub.userId, kitchenId, type: "advance", status: "paid",
     });
 
-    // If this is effectively month 1 and advance was paid, adjust
     const isFirstMonth = sub.createdAt &&
       `${sub.createdAt.getFullYear()}-${String(sub.createdAt.getMonth() + 1).padStart(2, "0")}` === month;
 
@@ -335,10 +304,6 @@ export const generateMonthlyBill = asyncHandler(async (req, res) => {
   res.json({ success: true, generated: results.length, results });
 });
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   PATCH /payments/pay/:paymentId
-   Customer submits UTR number — marks as "submitted" for owner to verify
-───────────────────────────────────────────────────────────────────────────── */
 export const submitPayment = asyncHandler(async (req, res) => {
   const { paymentId } = req.params;
   const { utrNumber, paymentNote } = req.body;
@@ -360,7 +325,7 @@ export const submitPayment = asyncHandler(async (req, res) => {
 
 /* ─────────────────────────────────────────────────────────────────────────────
    PATCH /payments/mark-paid/:paymentId
-   Owner confirms payment after verifying UTR
+   CHANGE 2: auto-creates subscription when owner approves an advance payment
 ───────────────────────────────────────────────────────────────────────────── */
 export const markPaymentPaid = asyncHandler(async (req, res) => {
   const { paymentId } = req.params;
@@ -375,13 +340,73 @@ export const markPaymentPaid = asyncHandler(async (req, res) => {
   payment.markedByOwner = req.user.id;
   await payment.save();
 
+  // ── CHANGE 2: auto-create subscription on advance payment approval ──
+  if (payment.type === "advance") {
+    const existingSub = await Subscription.findOne({
+      userId:    payment.userId,
+      kitchenId: payment.kitchenId._id,
+    });
+
+    if (!existingSub) {
+      const now     = new Date();
+      const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      endDate.setHours(23, 59, 59, 999);
+
+      await Subscription.create({
+        userId:        payment.userId,
+        kitchenId:     payment.kitchenId._id,
+        mealPlan:      payment.mealPlan,
+        preferredMeal: payment.preferredMeal || null,
+        startDate:     now,
+        endDate,
+      });
+    }
+  }
+
   res.json({ success: true, data: payment });
 });
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   GET /payments/my/:kitchenId
-   Customer's full payment history for a kitchen
+   CHANGE 3: NEW — PATCH /payments/reject/:paymentId
+   Owner rejects a submitted payment — resets so user can resubmit correct UTR
 ───────────────────────────────────────────────────────────────────────────── */
+export const rejectPayment = asyncHandler(async (req, res) => {
+  const { paymentId } = req.params;
+
+  const payment = await Payment.findById(paymentId).populate("kitchenId", "ownerId");
+  if (!payment) throw new AppError("Payment not found", 404);
+  if (payment.kitchenId.ownerId.toString() !== req.user.id)
+    throw new AppError("Not authorized", 403);
+  if (payment.status === "paid")
+  throw new AppError("Cannot reject an already paid payment", 400);
+
+  payment.status      = "pending";
+  payment.utrNumber   = "";
+  payment.paymentNote = "";
+  await payment.save();
+
+  res.json({ success: true, data: payment });
+});
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CHANGE 4: NEW — GET /payments/pending/:kitchenId
+   Owner fetches all payments with status "submitted" awaiting their approval
+───────────────────────────────────────────────────────────────────────────── */
+export const getPendingPayments = asyncHandler(async (req, res) => {
+  const { kitchenId } = req.params;
+
+  const kitchen = await Kitchen.findById(kitchenId).select("ownerId");
+  if (!kitchen) throw new AppError("Kitchen not found", 404);
+  if (kitchen.ownerId.toString() !== req.user.id)
+    throw new AppError("Not authorized", 403);
+
+  const pending = await Payment.find({ kitchenId, status: "submitted" })
+    .populate("userId", "name email phone")
+    .sort({ createdAt: -1 });
+
+  res.json({ success: true, data: pending });
+});
+
 export const getMyPayments = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
 
@@ -393,10 +418,6 @@ export const getMyPayments = asyncHandler(async (req, res) => {
   res.json({ success: true, data: payments });
 });
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   GET /payments/kitchen/:kitchenId
-   Owner sees ALL subscribers' payment status with color coding
-───────────────────────────────────────────────────────────────────────────── */
 export const getKitchenPayments = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
 
@@ -412,13 +433,11 @@ export const getKitchenPayments = asyncHandler(async (req, res) => {
     subs.map(async (sub) => {
       const unpaidMonths = await unpaidMonthsCount(sub.userId._id, kitchenId);
 
-      // Color logic
       let paymentColor = "green";
-      if      (unpaidMonths >= 4) paymentColor = "deepred";
+      if      (unpaidMonths >= 4)  paymentColor = "deepred";
       else if (unpaidMonths === 3) paymentColor = "red";
-      else if (unpaidMonths >= 1) paymentColor = "yellow";
+      else if (unpaidMonths >= 1)  paymentColor = "yellow";
 
-      // Latest payment record
       const latestPayment = await Payment.findOne({
         userId: sub.userId._id, kitchenId,
       }).sort({ createdAt: -1 });
@@ -439,10 +458,6 @@ export const getKitchenPayments = asyncHandler(async (req, res) => {
   res.json({ success: true, data: result });
 });
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   GET /payments/subscriber/:kitchenId/:userId
-   Owner sees one subscriber's full payment history
-───────────────────────────────────────────────────────────────────────────── */
 export const getSubscriberPayments = asyncHandler(async (req, res) => {
   const { kitchenId, userId } = req.params;
 

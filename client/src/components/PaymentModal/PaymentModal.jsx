@@ -2,20 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import api from "../../api/axios";
 import "./PaymentModal.css";
 
-/*
-  Props:
-  - kitchenId       — required
-  - kitchenName     — display name
-  - upiId           — kitchen's UPI ID (from kitchen model)
-  - amount          — amount to pay
-  - paymentId       — existing Payment._id (if already generated)
-  - type            — "advance" | "monthly"
-  - month           — "YYYY-MM" (for display)
-  - mealPlan        — "one" | "two" | "three" (required for advance before subscription)
-  - billBreakdown   — { monthlyPrice, pausedMeals, pauseDeduction } (monthly only)
-  - onClose         — fn
-  - onPaid          — fn called after UTR submitted
-*/
 export default function PaymentModal({
   kitchenId,
   kitchenName,
@@ -25,6 +11,7 @@ export default function PaymentModal({
   type = "monthly",
   month,
   mealPlan,
+  preferredMeal, 
   billBreakdown,
   onClose,
   onPaid,
@@ -55,7 +42,7 @@ export default function PaymentModal({
           .then(url => setQrUrl(url))
           .catch(err => console.error("QR generation error:", err));
       })
-      .catch(() => console.error("qrcode package not found — run: npm install qrcode in your client folder"));
+      .catch(() => console.error("qrcode package not found"));
   }, [step, upiId, amount]);
 
   // ── Create advance payment record (sends mealPlan so sub isn't required yet) ──
@@ -63,7 +50,7 @@ export default function PaymentModal({
     if (paymentId) return paymentId;
     setLoading(true);
     try {
-      const res = await api.post(`/payments/advance/${kitchenId}`, { mealPlan });
+      const res = await api.post(`/payments/advance/${kitchenId}`, { mealPlan, preferredMeal }); 
       const id  = res.data.data._id;
       setPaymentId(id);
       return id;
@@ -83,7 +70,7 @@ export default function PaymentModal({
   async function handleSubmitUTR() {
     if (!utr.trim()) { setError("Please enter your UTR / transaction ID"); return; }
 
-    // Create payment record now if still not created (user skipped QR and went straight to UTR)
+    // payment record
     const id = await ensurePaymentRecord();
     if (!id) return;
 

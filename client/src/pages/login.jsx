@@ -18,7 +18,7 @@ function Login() {
   const [step, setStep]                   = useState("login"); // "login" | "forgot" | "otp" | "reset"
   const [fpEmail, setFpEmail]             = useState("");
   const [otpToken, setOtpToken]           = useState("");
-  const [otp, setOtp]                     = useState(["", "", "", "", "", ""]);
+  const [otp, setOtp]                     = useState(["", "", "", "", "", ""]); 
   const [newPassword, setNewPassword]     = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [resending, setResending]         = useState(false);
@@ -38,7 +38,7 @@ function Login() {
       localStorage.setItem("token", token);
       setUser(user);
 
-      console.log("LOGIN SUCCESS:", user);
+      
 
       if (user.role === "roomProvider") {
         navigate("/rooms/my");

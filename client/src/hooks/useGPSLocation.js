@@ -6,7 +6,6 @@ export default function useGPSLocation() {
   const { user } = useAuth();
 
   useEffect(() => {
-    console.log("GPS hook running, user:", user?.role);
     if (!user || user.role !== "user") return;
     if (!navigator.geolocation) return;
 
@@ -15,7 +14,6 @@ export default function useGPSLocation() {
         const { latitude: lat, longitude: lng } = pos.coords;
         try {
           await api.patch("/auth/location", { lat, lng });
-          console.log("[GPS] Location saved:", lat, lng);
         } catch {}
       },
       (err) => {

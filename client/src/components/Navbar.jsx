@@ -6,6 +6,7 @@ import { getMyKitchens } from "../api/kitchen";
 import { getMyRooms } from "../api/rooms";
 import "./Navbar.css";
 import NotificationBell from "../Notification/Notificationbell";
+import EditProfileModal from "./EditProfile/EditProfile";
 
 export default function Navbar() {
   const { user, setUser, loading } = useAuth();
@@ -18,7 +19,8 @@ export default function Navbar() {
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [scrolled,    setScrolled]    = useState(false);
   const [dropOpen,    setDropOpen]    = useState(false);
-  
+  const [showEdit,    setShowEdit]    = useState(false);   // ← NEW
+
   const dropRef = useRef(null);
 
   // scroll shadow
@@ -155,6 +157,16 @@ export default function Navbar() {
 
                         <div className="nb-drop-divider" />
 
+                        {/* ── Edit Profile ── */}
+                        <button
+                          className="nb-drop-item"
+                          onClick={() => { setDropOpen(false); setShowEdit(true); }}
+                        >
+                          Edit Profile
+                        </button>
+
+                        <div className="nb-drop-divider" />
+
                         {roleLinks.map(l => (
                           <Link
                             key={l.to}
@@ -223,6 +235,17 @@ export default function Navbar() {
               {roleLinks.map(l => (
                 <Link key={l.to} to={l.to} className="nb-drawer-link">{l.label}</Link>
               ))}
+
+              {/* ── Edit Profile (mobile) ── */}
+              {user && (
+                <button
+                  className="nb-drawer-link"
+                  style={{ background: "none", border: "none", textAlign: "left", width: "100%", cursor: "pointer" }}
+                  onClick={() => { setMenuOpen(false); setShowEdit(true); }}
+                >
+                  ✏️ Edit Profile
+                </button>
+              )}
             </div>
 
             <div className="nb-drawer-footer">
@@ -242,6 +265,19 @@ export default function Navbar() {
 
           </div>
         </div>
+      )}
+
+      {/* ── Edit Profile Modal ── */}
+      {showEdit && (
+        <EditProfileModal
+          user={user}
+          onClose={() => setShowEdit(false)}
+          onUpdated={(updated) => {
+            setUser(updated);
+            localStorage.setItem("user", JSON.stringify(updated));
+            setShowEdit(false);
+          }}
+        />
       )}
     </>
   );

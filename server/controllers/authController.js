@@ -370,3 +370,45 @@ export const forgotPasswordReset = asyncHandler(async (req, res) => {
     message: "Password reset successful",
   });
 });
+export const updateProfile = asyncHandler(async (req, res) => {
+  const { name, email, currentPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user.id).select("+password");
+  if (!user) throw new AppError("User not found", 404);
+
+  // ── Update name ───────────────────────────────────────────────────────────
+  if (name?.trim()) {
+    user.name = name.trim();
+  }
+
+  // ── Update email ──────────────────────────────────────────────────────────
+  if (email?.trim() && email !== user.email) {
+    const emailTaken = await User.findOne({ email: email.trim() });
+    if (emailTaken) throw new AppError("Email is already in use", 409);
+    user.email = email.trim();
+  }
+
+  // ── Update password ───────────────────────────────────────────────────────
+  if (newPassword) {
+    if (!currentPassword) throw new AppError("Current password is required to set a new one", 400);
+    if (newPassword.length < 6) throw new AppError("New password must be at least 6 characters", 400);
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) throw new AppError("Current password is incorrect", 401);
+
+    user.password = await bcrypt.hash(newPassword, 10);
+  }
+
+  await user.save();
+
+  res.json({
+    success: true,
+    data: {
+      id:    user._id,
+      name:  user.name,
+      email: user.email,
+      role:  user.role,
+      phone: user.phone || "",
+    },
+  });
+});

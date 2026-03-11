@@ -19,8 +19,9 @@ export default function KitchenDetails() {
   const [similar, setSimilar]             = useState([]);
   const [selectedImage, setSelectedImage] = useState(0);
   const [mealPlan,      setMealPlan]      = useState("one");
-  const [preferredMeal, setPreferredMeal] = useState("dinner"); // for one-meal plan
+  const [preferredMeal, setPreferredMeal] = useState("dinner");
   const [isSubscribed, setIsSubscribed]   = useState(false);
+  const [isPending,     setIsPending]     = useState(false); // ← NEW: payment submitted, awaiting approval
   const [errorMsg, setErrorMsg]           = useState("");
   const [dayIndex, setDayIndex]           = useState(0);
   const [subCount, setSubCount]           = useState(0);
@@ -77,27 +78,35 @@ export default function KitchenDetails() {
   }
   useEffect(() => { fetchReviews(); }, [id]);
 
-  /* ── CHECK SUBSCRIPTION ── */
+  /* ── CHECK SUBSCRIPTION + PENDING PAYMENT ── */
   useEffect(() => {
     if (!user) return;
+
+    // Check active subscription
     api.get("/subscriptions/my")
       .then(res => {
-        const data    = res.data.data;
-         data.forEach((item, i) => {
-    console.log(`item[${i}] kitchenId:`, item.subscription?.kitchenId);
-  });
-  console.log("current page id:", id);
+        const data = res.data.data;
         const matched = Array.isArray(data)
           ? data.some(item => {
               const kId = item.subscription?.kitchenId?._id || item.subscription?.kitchenId;
               return String(kId) === String(id);
             })
           : false;
-           console.log("subscriptions data:", data);   // ← add this
-      console.log("isSubscribed:", matched);   
         setIsSubscribed(matched);
       })
       .catch(() => setIsSubscribed(false));
+
+    // ← NEW: Check if user has a pending/submitted advance payment for this kitchen
+   api.get(`/payments/my/${id}`)
+      .then(res => {
+        const payments = res.data.data || [];
+        const pendingAdvance = payments.find(
+          p => p.type === "advance" && p.status === "submitted"
+        );
+        setIsPending(!!pendingAdvance);
+      })
+      .catch(() => setIsPending(false));
+
   }, [id, user]);
 
   /* ── FETCH SIMILAR ── */
@@ -137,12 +146,15 @@ export default function KitchenDetails() {
   }
 
   /* ── SUBSCRIBE ── */
-  // Step 1: user clicks Subscribe → open payment modal immediately (no subscription yet)
+  // Step 1: open payment modal
   function openAdvanceModal(plan) {
     const priceMap = {
-      one:   kitchen.oneMealPrice,
-      two:   kitchen.twoMealPrice,
-      three: kitchen.threeMealPrice,
+      one:       kitchen.oneMealPrice,
+      two:       kitchen.twoMealPrice,
+      three:     kitchen.threeMealPrice,
+      breakfast: kitchen.breakfastPrice,
+      lunch:     kitchen.lunchPrice,
+      dinner:    kitchen.dinnerPrice,
     };
     setAdvanceInfo({
       kitchenName:   kitchen.kitchenName,
@@ -155,37 +167,17 @@ export default function KitchenDetails() {
     setShowPayment(true);
   }
 
-  // Step 2: called by PaymentModal after UTR is submitted → NOW create subscription
+  // ← CHANGED: Step 2 — after UTR submitted, just show pending state (no auto-subscribe)
   async function onAdvancePaid() {
     setShowPayment(false);
-    setSubLoading(true);
-    setErrorMsg("");
-    try {
-      await api.post(`/kitchens/${id}/subscribe`, {
-        mealPlan:      advanceInfo?.plan      || mealPlan,
-        preferredMeal: advanceInfo?.preferredMeal || null,
-      });
-      setIsSubscribed(true);
-      setSubCount(p => p + 1);
-    } catch (err) {
-      if (err.response?.status === 409) {
-        setIsSubscribed(true); // already subscribed, fine
-      } else {
-        setErrorMsg("Payment submitted but subscription failed. Please contact the kitchen.");
-      }
-    } finally {
-      setSubLoading(false);
-    }
+    setIsPending(true); // show "pending approval" UI
   }
 
   /* ── UNSUBSCRIBE ── */
-  // Step 1: show confirmation modal
   function confirmUnsubscribe() {
-    // Find current subscription end date from subscriptions check
     setShowUnsubConfirm(true);
   }
 
-  // Step 2: user confirmed — actually unsubscribe
   async function unsubscribe() {
     setErrorMsg("");
     setShowUnsubConfirm(false);
@@ -228,7 +220,7 @@ export default function KitchenDetails() {
     setIsEditing(false);
   }
 
-  // ── Fetch subscription end date so unsubscribe modal can show it ──
+  // ── Fetch subscription end date ──
   useEffect(() => {
     if (!user || !isSubscribed) return;
     api.get("/subscriptions/my")
@@ -249,8 +241,6 @@ export default function KitchenDetails() {
   return (
     <div className="kd-page">
 
-      {/* ── Advance Payment Modal ─────────────────────────────────────────── */}
-      {/* ── Advance Payment Modal (shown BEFORE subscription is created) ── */}
       {showPayment && advanceInfo && (
         <PaymentModal
           kitchenId={id}
@@ -260,12 +250,12 @@ export default function KitchenDetails() {
           type="advance"
           month={advanceInfo.month}
           mealPlan={advanceInfo.plan}
+          preferredMeal={advanceInfo.preferredMeal}
           onClose={() => setShowPayment(false)}
           onPaid={onAdvancePaid}
         />
       )}
 
-      {/* ── Unsubscribe Confirmation Modal ── */}
       {showUnsubConfirm && (
         <UnsubscribeModal
           kitchen={kitchen}
@@ -510,15 +500,26 @@ export default function KitchenDetails() {
               ) : user ? (
 
                 <>
-                  {isSubscribed && <div className="kd-subscribed-badge">✓ You are subscribed</div>}
-                  {errorMsg     && <div className="kd-error-msg">{errorMsg}</div>}
+                  {/* ── Subscription status indicators ── */}
+                  {isSubscribed && (
+                    <div className="kd-subscribed-badge">✓ You are subscribed</div>
+                  )}
+
+                  {/* ← NEW: Pending approval banner */}
+                  {!isSubscribed && isPending && (
+                    <div className="kd-pending-badge">
+                      ⏳ Payment submitted — awaiting owner approval
+                    </div>
+                  )}
+
+                  {errorMsg && <div className="kd-error-msg">{errorMsg}</div>}
 
                   <button className="kd-contact-btn" onClick={contactOwner}>
                     Contact Owner
                   </button>
 
-                  {/* Meal plan selector — only before subscribing */}
-                  {!isSubscribed && (
+                  {/* Meal plan selector — only before subscribing and not pending */}
+                  {!isSubscribed && !isPending && (
                     <>
                       <select
                         value={mealPlan}
@@ -536,7 +537,6 @@ export default function KitchenDetails() {
                         }
                       </select>
 
-                      {/* Which meal — only shown for 1-meal plan */}
                       {mealPlan === "one" && (
                         <div className="kd-preferred-meal">
                           <p className="kd-preferred-label">Which meal do you want?</p>
@@ -559,17 +559,8 @@ export default function KitchenDetails() {
                   )}
 
                   <div id="subscribe">
-                    {!isSubscribed ? (
-                      <button
-                        className="kd-subscribe-btn"
-                        onClick={() => openAdvanceModal(mealPlan)}
-                        disabled={subLoading}
-                      >
-                        {subLoading ? "Subscribing…" : "Subscribe & Pay"}
-                      </button>
-                    ) : (
+                    {isSubscribed ? (
                       <>
-                        {/* Re-open payment modal if they dismissed without paying */}
                         <button
                           className="kd-pay-btn"
                           onClick={() => openAdvanceModal(mealPlan)}
@@ -583,6 +574,19 @@ export default function KitchenDetails() {
                           Unsubscribe
                         </button>
                       </>
+                    ) : isPending ? (
+                      // ← NEW: pending state — no subscribe button, just info
+                      <p className="kd-pending-note">
+                        Your payment is under review. You'll be subscribed once the owner approves it.
+                      </p>
+                    ) : (
+                      <button
+                        className="kd-subscribe-btn"
+                        onClick={() => openAdvanceModal(mealPlan)}
+                        disabled={subLoading}
+                      >
+                        {subLoading ? "Subscribing…" : "Subscribe & Pay"}
+                      </button>
                     )}
                   </div>
                 </>
@@ -626,7 +630,7 @@ function UnsubscribeModal({ kitchen, mealPlan, onConfirm, onCancel }) {
     two:   kitchen.twoMealPrice,
     three: kitchen.threeMealPrice,
   };
-  const mealsPerDay = mealPlan === "three" ? 3 : mealPlan === "two" ? 2 : 1;
+  const mealsPerDay  = mealPlan === "three" ? 3 : mealPlan === "two" ? 2 : 1;
   const monthlyPrice = priceMap[mealPlan] || 0;
 
   const today       = new Date();
@@ -639,10 +643,8 @@ function UnsubscribeModal({ kitchen, mealPlan, onConfirm, onCancel }) {
   return (
     <div className="unsub-overlay">
       <div className="unsub-modal">
-
         <div className="unsub-icon">⚠️</div>
         <h3 className="unsub-title">Unsubscribe from {kitchen.kitchenName}?</h3>
-
         <div className="unsub-info-box">
           <div className="unsub-info-row">
             <span>Days left this month</span>
@@ -658,20 +660,13 @@ function UnsubscribeModal({ kitchen, mealPlan, onConfirm, onCancel }) {
             <strong className="unsub-amount">≈ ₹{refundEst}</strong>
           </div>
         </div>
-
         <p className="unsub-note">
           ℹ️ Refunds are at the kitchen owner's discretion. Contact the owner directly to discuss a refund for the unused days.
         </p>
-
         <div className="unsub-actions">
-          <button className="unsub-cancel-btn" onClick={onCancel}>
-            Keep Subscription
-          </button>
-          <button className="unsub-confirm-btn" onClick={onConfirm}>
-            Yes, Unsubscribe
-          </button>
+          <button className="unsub-cancel-btn" onClick={onCancel}>Keep Subscription</button>
+          <button className="unsub-confirm-btn" onClick={onConfirm}>Yes, Unsubscribe</button>
         </div>
-
       </div>
     </div>
   );

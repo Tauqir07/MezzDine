@@ -2,6 +2,7 @@ import { useEffect,useState } from "react";
 import { getMyKitchens,deleteKitchen } from "../../api/kitchen";
 import { Link,useNavigate } from "react-router-dom";
 import "../../styles/DashboardListings.css";
+import PageLoader from "../../components/PageLoader";
 
 export default function MyKitchens(){
 
@@ -25,7 +26,7 @@ console.error(err);
 
 },[]);
 
-if(loading) return <p>Loading kitchens...</p>;
+if(loading) return <PageLoader />;
 if(error) return <p>{error}</p>;
 
 return(

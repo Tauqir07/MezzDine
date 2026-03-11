@@ -11,6 +11,7 @@ import {
   forgotPasswordSendOtp,
   forgotPasswordVerifyOtp,
   forgotPasswordReset,
+  updateProfile,
 } from "../controllers/authController.js";
 
 import {
@@ -45,5 +46,6 @@ router.post("/forgot-password/reset",      forgotResetValidator,     validate, f
 
 // ── Login ─────────────────────────────────────────────────────────────────────
 router.post("/login", loginValidator, validate, login);
+router.patch("/profile", auth, updateProfile);
 
 export default router;

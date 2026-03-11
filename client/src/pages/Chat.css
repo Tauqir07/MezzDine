@@ -497,3 +497,53 @@
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.3; }
 }
+@media (max-width: 768px) {
+  .chat-messages {
+    padding: 10px 12px 8px;
+  }
+
+  .chat-row {
+    max-width: 88%;
+  }
+
+  .chat-bubble {
+    font-size: 14px;
+    padding: 8px 11px 6px;
+  }
+
+  .chat-header {
+    padding: 8px 12px;
+  }
+
+  .chat-header-name {
+    font-size: 15px;
+  }
+
+  .chat-input-area {
+    padding: 8px 10px;
+  }
+
+  .chat-input-area input {
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chat-row {
+    max-width: 94%;
+  }
+
+  .chat-row-avatar {
+    display: none;
+  }
+
+  .chat-reply-bar {
+    padding: 6px 10px;
+  }
+
+  .chat-send-btn {
+    width: 40px;
+    height: 40px;
+  }
+}

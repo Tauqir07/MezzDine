@@ -411,3 +411,68 @@ max-width:100%;
 height:auto;
 display:block;
 }
+@media (max-width: 900px) {
+  .rd-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .rd-right {
+    max-width: 100%;
+  }
+
+  .rd-booking-card {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .rd-container {
+    padding: 0 16px;
+  }
+
+  .gallery {
+    margin: 16px 0 24px;
+  }
+
+  .review-form-bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .review-select,
+  .review-btn {
+    width: 100%;
+  }
+
+  .similar-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .rd-container {
+    padding: 0 12px;
+  }
+
+  .review-form {
+    padding: 14px;
+  }
+
+  .review-card {
+    padding: 14px;
+  }
+
+  .main-image {
+    height: clamp(200px, 55vw, 300px);
+  }
+
+  .similar-card img {
+    height: 100px;
+  }
+
+  .thumb {
+    width: 64px;
+    height: 46px;
+  }
+}

@@ -80,3 +80,38 @@
   padding: 20px;
 }
 .sm-no-location span { font-size: 28px; }
+@media (max-width: 768px) {
+  .sm-map {
+    height: 280px;
+  }
+
+  .sm-stats {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .sm-stat {
+    font-size: 12px;
+  }
+
+  .sm-legend {
+    gap: 12px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+
+  .sm-legend-item {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sm-map {
+    height: 220px;
+  }
+
+  .sm-stats {
+    flex-direction: column;
+    gap: 6px;
+  }
+}

@@ -5,6 +5,7 @@ import cloudinary   from "../config/cloudinary.js";
 import Subscription from "../models/Subscription.js";
 import Notification from "../models/Notification.js";
 import { geocodeAddress } from "../utils/geocode.js";
+import User from "../models/user.js";
 
 export const createKitchen = asyncHandler(async (req, res) => {
 
@@ -183,11 +184,13 @@ export const subscribeKitchen = asyncHandler(async (req, res) => {
     ? `1 meal (${preferredMeal})`
     : `${mealPlan} meal plan`;
 
+    const user = await User.findById(req.user.id).select("name phone");
+
   await Notification.create({
     recipientId: kitchen.ownerId._id,
     type:        "subscription",
     title:       "🎉 New Subscriber!",
-    message:     `Someone subscribed to ${kitchen.kitchenName} (${mealLabel}).`,
+     message:     `${user.name} (ph- ${user.phone || "N/A"}) subscribed to ${kitchen.kitchenName} (${mealLabel}).`,
     kitchenId,
   });
 

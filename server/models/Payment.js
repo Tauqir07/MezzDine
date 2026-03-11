@@ -21,13 +21,17 @@ const paymentSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["pending", "submitted", "paid"],
+      enum: ["pending", "submitted", "paid","cancelled"],
       default: "pending",
     },
 
     // Customer fills these when paying
     utrNumber:   { type: String, default: "" },
     paymentNote: { type: String, default: "" },
+    
+    mealPlan:      { type: String },
+    preferredMeal: { type: String },
+    markedByOwner: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
     // Owner confirms
     markedByOwner: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },

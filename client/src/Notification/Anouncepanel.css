@@ -71,3 +71,23 @@
 .ap-feedback { font-size: 13px; font-weight: 600; margin: 10px 0 0; }
 .ap-feedback--ok  { color: #16a34a; }
 .ap-feedback--err { color: #dc2626; }
+@media (max-width: 480px) {
+  .ap-wrap {
+    padding: 14px;
+    margin-top: 16px;
+  }
+
+  .ap-templates {
+    gap: 6px;
+  }
+
+  .ap-tpl {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+
+  .ap-send-btn {
+    width: 100%;
+    padding: 12px;
+  }
+}

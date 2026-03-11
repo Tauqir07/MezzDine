@@ -131,3 +131,30 @@
   border-radius: 6px;
   padding: 5px 8px;
 }
+@media (max-width: 480px) {
+  .psb-badge {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  .psb-dropdown {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    border-radius: 16px 16px 0 0;
+    padding: 16px;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+    z-index: 999;
+  }
+
+  .psb-latest-row {
+    font-size: 13px;
+  }
+
+  .psb-confirm-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+}

@@ -135,4 +135,36 @@ transform:none;
 .cm-meals{
 grid-template-columns:1fr;
 }
+}@media (max-width: 768px) {
+  .cm-page {
+    margin: 16px auto;
+    padding: 12px;
+  }
+
+  .cm-card {
+    padding: 16px;
+  }
+
+  .cm-title {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .cm-meals {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .cm-meals {
+    grid-template-columns: 1fr;
+  }
+
+  .cm-day {
+    padding: 12px;
+  }
+
+  .cm-meal {
+    padding: 10px;
+  }
 }

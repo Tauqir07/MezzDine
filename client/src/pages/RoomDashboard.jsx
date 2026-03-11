@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "../api/axios";
 import "./RoomDashboard.css";
 import VisitStats from "../components/VisitStats/VisitStats";
+import PageLoader from "../components/PageLoader";
 
 const TENANT_CONFIG = {
   bachelor_male:   { icon: "👨", label: "Bachelor (Male)",   color: "#3b82f6", bg: "#eff6ff" },
@@ -126,12 +127,7 @@ export default function RoomDashboard() {
   const now = new Date();
   const monthLabel = `${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
 
-  if (loading) return (
-    <div className="rdb-loading">
-      <div className="rdb-spinner" />
-      <p>Loading dashboard…</p>
-    </div>
-  );
+  if (loading) return <PageLoader/>;
 
   return (
     <div className="rdb-page">
