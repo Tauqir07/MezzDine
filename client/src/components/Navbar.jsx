@@ -8,7 +8,7 @@ import "./Navbar.css";
 import NotificationBell from "../Notification/Notificationbell";
 
 export default function Navbar() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, loading } = useAuth();
   const navigate  = useNavigate();
   const location  = useLocation();
 
@@ -18,6 +18,7 @@ export default function Navbar() {
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [scrolled,    setScrolled]    = useState(false);
   const [dropOpen,    setDropOpen]    = useState(false);
+  
   const dropRef = useRef(null);
 
   // scroll shadow
@@ -118,61 +119,63 @@ export default function Navbar() {
 
           {/* ── Right actions (desktop) ── */}
           <div className="nb-right">
-            {!user ? (
-              <>
-                <Link to="/login"    className="nb-link">Sign in</Link>
-                <Link to="/register" className="nb-pill">Get started</Link>
-              </>
-            ) : (
-              <>
-                <NotificationBell />
+            {!loading && (
+              !user ? (
+                <>
+                  <Link to="/login"    className="nb-link">Sign in</Link>
+                  <Link to="/register" className="nb-pill">Get started</Link>
+                </>
+              ) : (
+                <>
+                  <NotificationBell />
 
-                {/* Avatar dropdown */}
-                <div className="nb-drop-wrap" ref={dropRef}>
-                  <button
-                    className={`nb-avatar ${dropOpen ? "nb-avatar--open" : ""}`}
-                    onClick={() => setDropOpen(p => !p)}
-                    aria-label="User menu"
-                  >
-                    {initial}
-                  </button>
+                  {/* Avatar dropdown */}
+                  <div className="nb-drop-wrap" ref={dropRef}>
+                    <button
+                      className={`nb-avatar ${dropOpen ? "nb-avatar--open" : ""}`}
+                      onClick={() => setDropOpen(p => !p)}
+                      aria-label="User menu"
+                    >
+                      {initial}
+                    </button>
 
-                  {dropOpen && (
-                    <div className="nb-dropdown">
-                      <div className="nb-drop-header">
-                        <div className="nb-drop-avatar">{initial}</div>
-                        <div>
-                          <div className="nb-drop-name">{user.name}</div>
-                          <div className="nb-drop-role">{
-                            user.role === "kitchenOwner" ? "Kitchen Owner" :
-                            user.role === "roomProvider" ? "Room Provider" :
-                            "Member"
-                          }</div>
+                    {dropOpen && (
+                      <div className="nb-dropdown">
+                        <div className="nb-drop-header">
+                          <div className="nb-drop-avatar">{initial}</div>
+                          <div>
+                            <div className="nb-drop-name">{user.name}</div>
+                            <div className="nb-drop-role">{
+                              user.role === "kitchenOwner" ? "Kitchen Owner" :
+                              user.role === "roomProvider" ? "Room Provider" :
+                              "Member"
+                            }</div>
+                          </div>
                         </div>
+
+                        <div className="nb-drop-divider" />
+
+                        {roleLinks.map(l => (
+                          <Link
+                            key={l.to}
+                            to={l.to}
+                            className="nb-drop-item"
+                            onClick={() => setDropOpen(false)}
+                          >
+                            {l.label}
+                          </Link>
+                        ))}
+
+                        {roleLinks.length > 0 && <div className="nb-drop-divider" />}
+
+                        <button className="nb-drop-item nb-drop-item--logout" onClick={handleLogout}>
+                          Sign out
+                        </button>
                       </div>
-
-                      <div className="nb-drop-divider" />
-
-                      {roleLinks.map(l => (
-                        <Link
-                          key={l.to}
-                          to={l.to}
-                          className="nb-drop-item"
-                          onClick={() => setDropOpen(false)}
-                        >
-                          {l.label}
-                        </Link>
-                      ))}
-
-                      {roleLinks.length > 0 && <div className="nb-drop-divider" />}
-
-                      <button className="nb-drop-item nb-drop-item--logout" onClick={handleLogout}>
-                        Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </>
+                    )}
+                  </div>
+                </>
+              )
             )}
 
             {/* Hamburger (mobile) */}
@@ -223,15 +226,17 @@ export default function Navbar() {
             </div>
 
             <div className="nb-drawer-footer">
-              {!user ? (
-                <>
-                  <Link to="/login"    className="nb-drawer-btn nb-drawer-btn--outline">Sign in</Link>
-                  <Link to="/register" className="nb-drawer-btn nb-drawer-btn--dark">Get started</Link>
-                </>
-              ) : (
-                <button className="nb-drawer-btn nb-drawer-btn--outline" onClick={handleLogout}>
-                  Sign out
-                </button>
+              {!loading && (
+                !user ? (
+                  <>
+                    <Link to="/login"    className="nb-drawer-btn nb-drawer-btn--outline">Sign in</Link>
+                    <Link to="/register" className="nb-drawer-btn nb-drawer-btn--dark">Get started</Link>
+                  </>
+                ) : (
+                  <button className="nb-drawer-btn nb-drawer-btn--outline" onClick={handleLogout}>
+                    Sign out
+                  </button>
+                )
               )}
             </div>
 

@@ -310,10 +310,125 @@
   transition: width 0.6s ease;
 }
 
+/* ── Unsubscription notifications ── */
+.kdash-unsub-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.kdash-unsub-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.kdash-unsub-card--unread {
+  border-color: #c96a3a44;
+  background: #fff8f5;
+}
+.kdash-unsub-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.kdash-unsub-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c96a3a, #d4748c);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.kdash-unsub-name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.kdash-unsub-time { font-size: 12px; color: #aaa; margin-top: 2px; }
+.kdash-unsub-new {
+  margin-left: auto;
+  background: #c96a3a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.kdash-unsub-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.kdash-unsub-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.kdash-unsub-stat span { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.6px; }
+.kdash-unsub-stat strong { font-size: 14px; font-weight: 700; color: #333; }
+.kdash-unsub-stat--refund strong { color: #c96a3a; }
+
+/* ── Bill Generator ── */
+.kdash-bill-gen {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.kdash-bill-gen-desc {
+  font-size: 13px;
+  color: #aaa;
+  margin: 0;
+  flex: 1;
+  min-width: 200px;
+  line-height: 1.6;
+}
+.kdash-generate-btn {
+  padding: 10px 22px;
+  border-radius: 10px;
+  border: none;
+  background: #c96a3a;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.kdash-generate-btn:hover:not(:disabled) {
+  background: #b05a2e;
+  transform: translateY(-1px);
+}
+.kdash-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.kdash-bill-msg {
+  width: 100%;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
 /* ── Responsive ── */
 @media (max-width: 700px) {
   .kdash-timeline { grid-template-columns: 1fr; }
   .kdash-grid     { grid-template-columns: 1fr; }
   .kdash-header   { flex-direction: column; }
   .kdash-stats    { width: 100%; justify-content: space-between; }
+  .kdash-unsub-stats { grid-template-columns: repeat(2, 1fr); }
+  .kdash-bill-gen { flex-direction: column; align-items: flex-start; }
 }

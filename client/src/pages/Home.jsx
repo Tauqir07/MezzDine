@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "../context/authContext";
 import "../styles/Home.css";
 
 const STATS = [
@@ -49,6 +50,7 @@ const TESTIMONIALS = [
 ];
 
 export default function Home() {
+  const { user, loading } = useAuth();
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const heroRef = useRef(null);
 
@@ -57,7 +59,7 @@ export default function Home() {
       setActiveTestimonial(p => (p + 1) % TESTIMONIALS.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -68,7 +70,7 @@ export default function Home() {
     );
     document.querySelectorAll(".reveal").forEach(el => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [user]);
 
   return (
     <div className="hm-page">
@@ -230,22 +232,24 @@ export default function Home() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="hm-cta reveal">
-        <div className="hm-cta-inner">
-          <div className="hm-cta-blob" />
-          <div className="hm-section-tag hm-section-tag--light">Get started today</div>
-          <h2 className="hm-cta-title">Your perfect space is one click away</h2>
-          <p className="hm-cta-sub">Join thousands of users already finding rooms and meals on our platform.</p>
-          <div className="hm-cta-btns">
-            <Link to="/register" className="hm-btn hm-btn--white">
-              Create Free Account →
-            </Link>
-            <Link to="/login" className="hm-btn hm-btn--ghost">
-              Sign In
-            </Link>
+      {!loading && !user && (
+        <section className="hm-cta reveal">
+          <div className="hm-cta-inner">
+            <div className="hm-cta-blob" />
+            <div className="hm-section-tag hm-section-tag--light">Get started today</div>
+            <h2 className="hm-cta-title">Your perfect space is one click away</h2>
+            <p className="hm-cta-sub">Join thousands of users already finding rooms and meals on our platform.</p>
+            <div className="hm-cta-btns">
+              <Link to="/register" className="hm-btn hm-btn--white">
+                Create Free Account →
+              </Link>
+              <Link to="/login" className="hm-btn hm-btn--ghost">
+                Sign In
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
     </div>
   );

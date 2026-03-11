@@ -83,12 +83,18 @@ export default function KitchenDetails() {
     api.get("/subscriptions/my")
       .then(res => {
         const data    = res.data.data;
+         data.forEach((item, i) => {
+    console.log(`item[${i}] kitchenId:`, item.subscription?.kitchenId);
+  });
+  console.log("current page id:", id);
         const matched = Array.isArray(data)
           ? data.some(item => {
               const kId = item.subscription?.kitchenId?._id || item.subscription?.kitchenId;
               return String(kId) === String(id);
             })
           : false;
+           console.log("subscriptions data:", data);   // ← add this
+      console.log("isSubscribed:", matched);   
         setIsSubscribed(matched);
       })
       .catch(() => setIsSubscribed(false));
