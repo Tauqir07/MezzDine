@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import "./DeliveryTracker.css";
+import "./Deliverytracker.css";
 
 const STEPS = [
   { key: "preparing",        label: "Preparing",        icon: "👨‍🍳", desc: "Your food is being prepared" },

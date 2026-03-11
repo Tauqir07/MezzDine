@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
-import "./PausePanel.css";
+import "./Pausepanel.css";
 
 const MEAL_INFO = {
   breakfast: { label: "Breakfast", emoji: "🌅", cutoffNote: "before 7:00 AM same day" },
