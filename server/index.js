@@ -18,7 +18,7 @@ import errorHandler       from "./middlewares/errorHandler.js";
 import kitchenMenuRoutes  from "./routes/KitchenMenu.js";
 import subscriptionRoutes from "./routes/SubscriptionRoutes.js";
 import kitchenreview      from "./routes/KitchenReviewRoutes.js";
-import roomRentalRoutes   from "./routes/RoomrentalRoutes.js";
+import roomRentalRoutes   from "./routes/Roomrentalroutes.js";
 import notificationRoutes from "./routes/Notificationroutes.js";
 import deliveryRoutes     from "./routes/Deliveryroutes.js";
 import visitRoutes        from "./routes/VisitRoutes.js";
