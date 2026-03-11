@@ -1,6 +1,6 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError     from "../utils/AppError.js";
-import { transporter } from "../utils/otpUtils.js";
+import { transporter } from "../utils/OtpUtils.js";
 
 export const submitContact = asyncHandler(async (req, res) => {
   const { type, name, company, email, phone, message } = req.body;
