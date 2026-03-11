@@ -6,7 +6,7 @@ import "./KitchenDetails.css";
 import { startConversation } from "../../api/chat";
 import PageLoader from "../../components/PageLoader";
 import Kitchenmap from "../../map/Kitchenmap";
-import PaymentModal from "../../components/paymentModal/PaymentModal";
+import PaymentModal from "../../components/PaymentModal/PaymentModal";
 
 export default function KitchenDetails() {
 
