@@ -11,7 +11,7 @@ import cron from "node-cron";
 
 import authRoutes         from "./routes/auth.js";
 import roomRoutes         from "./routes/rooms.js";
-import kitchenRoutes      from "./routes/kitchens.js";
+import kitchenRoutes      from "./routes/Kitchen.js";
 import reviewRoutes       from "./routes/roomreview.js";
 import chatRoutes         from "./routes/chatRoutes.js";
 import errorHandler       from "./middlewares/errorHandler.js";
@@ -24,7 +24,7 @@ import deliveryRoutes     from "./routes/Deliveryroutes.js";
 import visitRoutes        from "./routes/VisitRoutes.js";
 import paymentRoutes      from "./routes/PaymentRoutes.js";
 
-import Kitchen      from "./models/kitchen.js";
+import Kitchen      from "./models/Kitchen.js";
 import Payment      from "./models/Payment.js";
 import Subscription from "./models/Subscription.js";
 import MealPause    from "./models/MealPause.js";
