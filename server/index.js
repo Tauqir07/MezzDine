@@ -11,7 +11,7 @@ import cron from "node-cron";
 
 import authRoutes         from "./routes/auth.js";
 import roomRoutes         from "./routes/rooms.js";
-import kitchenRoutes      from "./routes/Kitchen.js";
+import kitchenRoutes      from "./routes/KitchenRoutes.js";
 import reviewRoutes       from "./routes/roomreview.js";
 import chatRoutes         from "./routes/chatRoutes.js";
 import errorHandler       from "./middlewares/errorHandler.js";
