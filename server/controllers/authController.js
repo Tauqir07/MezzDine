@@ -28,14 +28,14 @@ async function sendEmailOtp(email, otp, type = "register") {
     : "Use the code below to complete your MeZzDiNe registration. It expires in <strong>10 minutes</strong>.";
 
   const transporter = nodemailer.createTransport({
-    host:   "smtp.gmail.com",
-    port:   465,
-    secure: true,
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_PASS,
-    },
-  });
+  host:   "smtp.gmail.com",
+  port:   587,
+  secure: false, // use STARTTLS
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_PASS,
+  },
+});
 
   await transporter.sendMail({
     from:    `"MeZzDiNe" <${process.env.GMAIL_USER}>`,
