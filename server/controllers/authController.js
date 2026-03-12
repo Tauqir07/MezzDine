@@ -1,17 +1,16 @@
 import bcrypt       from "bcryptjs";
 import jwt          from "jsonwebtoken";
 import crypto       from "crypto";
-import { Resend }   from "resend";
-
 import User         from "../models/user.js";
 import Otp          from "../models/Otp.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError     from "../utils/AppError.js";
+import SibApiV3Sdk from "sib-api-v3-sdk";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
-console.log("GMAIL_USER:", process.env.GMAIL_USER);
-console.log("GMAIL_PASS length:", process.env.GMAIL_PASS?.length);
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+defaultClient.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
+const brevoClient = new SibApiV3Sdk.TransactionalEmailsApi();
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -28,23 +27,24 @@ async function sendEmailOtp(email, otp, type = "register") {
     ? "Use the code below to reset your password. It expires in <strong>10 minutes</strong>."
     : "Use the code below to complete your MeZzDiNe registration. It expires in <strong>10 minutes</strong>.";
 
-  await resend.emails.send({
-    from:    "MeZzDiNe <onboarding@resend.dev>",
-    to:      email,
-    subject,
-    html: `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f7f3ee;border-radius:16px;">
-        <h2 style="font-size:24px;color:#1c1a17;margin:0 0 8px;">${heading}</h2>
-        <p style="color:#64748b;margin:0 0 28px;">${bodyText}</p>
-        <div style="background:#fff;border-radius:12px;padding:24px;text-align:center;letter-spacing:12px;font-size:36px;font-weight:800;color:#c2692a;border:2px solid #fde8c8;">
-          ${otp}
-        </div>
-        <p style="color:#94a3b8;font-size:12px;margin-top:24px;">
-          If you didn't request this, you can safely ignore this email.
-        </p>
+  const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+  sendSmtpEmail.subject = subject;
+  sendSmtpEmail.to      = [{ email }];
+  sendSmtpEmail.sender  = { name: "MeZzDiNe", email: process.env.BREVO_SENDER_EMAIL };
+  sendSmtpEmail.htmlContent = `
+    <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f7f3ee;border-radius:16px;">
+      <h2 style="font-size:24px;color:#1c1a17;margin:0 0 8px;">${heading}</h2>
+      <p style="color:#64748b;margin:0 0 28px;">${bodyText}</p>
+      <div style="background:#fff;border-radius:12px;padding:24px;text-align:center;letter-spacing:12px;font-size:36px;font-weight:800;color:#c2692a;border:2px solid #fde8c8;">
+        ${otp}
       </div>
-    `,
-  });
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px;">
+        If you didn't request this, you can safely ignore this email.
+      </p>
+    </div>
+  `;
+
+  await brevoClient.sendTransacEmail(sendSmtpEmail);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -223,7 +223,6 @@ export const getMe = asyncHandler(async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // PATCH /auth/phone
 // Body: { phone }
-// Lets existing users (who registered before this field existed) add their number
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const updatePhone = asyncHandler(async (req, res) => {
@@ -295,7 +294,6 @@ export const forgotPasswordSendOtp = asyncHandler(async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /auth/forgot-password/verify-otp
-// Body: { email, otp, otpToken }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const forgotPasswordVerifyOtp = asyncHandler(async (req, res) => {
@@ -329,7 +327,6 @@ export const forgotPasswordVerifyOtp = asyncHandler(async (req, res) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /auth/forgot-password/reset
-// Body: { email, otpToken, password }
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const forgotPasswordReset = asyncHandler(async (req, res) => {
@@ -361,25 +358,27 @@ export const forgotPasswordReset = asyncHandler(async (req, res) => {
     message: "Password reset successful",
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH /auth/profile
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const updateProfile = asyncHandler(async (req, res) => {
   const { name, email, currentPassword, newPassword } = req.body;
 
   const user = await User.findById(req.user.id).select("+password");
   if (!user) throw new AppError("User not found", 404);
 
-  // ── Update name ───────────────────────────────────────────────────────────
   if (name?.trim()) {
     user.name = name.trim();
   }
 
-  // ── Update email ──────────────────────────────────────────────────────────
   if (email?.trim() && email !== user.email) {
     const emailTaken = await User.findOne({ email: email.trim() });
     if (emailTaken) throw new AppError("Email is already in use", 409);
     user.email = email.trim();
   }
 
-  // ── Update password ───────────────────────────────────────────────────────
   if (newPassword) {
     if (!currentPassword) throw new AppError("Current password is required to set a new one", 400);
     if (newPassword.length < 6) throw new AppError("New password must be at least 6 characters", 400);
