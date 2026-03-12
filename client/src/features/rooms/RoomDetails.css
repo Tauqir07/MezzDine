@@ -407,14 +407,98 @@
 .rd-similar-name  { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
 .rd-similar-price { font-size: 13px; color: #666; }
 
-/* ── Responsive ── */
+/* ─────────────────────────────────────────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────────────────────────────────────────── */
+
 @media (max-width: 900px) {
-  .rd-grid { grid-template-columns: 1fr; }
-  .rd-right { position: static; }
-  .rd-title { font-size: 24px; }
+  .rd-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Move booking card above content on tablet/mobile */
+  .rd-right {
+    position: static;
+    order: -1;
+    margin-bottom: 24px;
+  }
+
+  .rd-title { font-size: 26px; }
 }
+
 @media (max-width: 600px) {
-  .rd-container { padding: 20px 16px 40px; }
-  .rd-facts { gap: 10px; }
-  .rd-amenities { grid-template-columns: 1fr 1fr; }
+  /* Owner banner */
+  .rd-owner-banner {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .rd-owner-banner-title { font-size: 13px; }
+  .rd-owner-banner-sub   { display: none; }
+  .rd-owner-btn-secondary { padding: 7px 12px; font-size: 12px; }
+  .rd-owner-btn-primary   { padding: 7px 12px; font-size: 12px; }
+
+  /* Container */
+  .rd-container { padding: 16px 14px 80px; }
+
+  /* Header */
+  .rd-title { font-size: 22px; margin-bottom: 10px; }
+  .rd-meta  { gap: 10px; }
+  .rd-meta-item { font-size: 12.5px; }
+  .rd-header-tags { gap: 6px; margin-bottom: 10px; }
+  .rd-tag { font-size: 11px; padding: 4px 10px; }
+
+  /* Booking card — compact on mobile */
+  .rd-booking-card {
+    padding: 18px 16px;
+    border-radius: 16px;
+    /* Show price + contact button prominently, hide less important details */
+  }
+  .rd-price      { font-size: 24px; }
+  .rd-price-unit { font-size: 13px; }
+  .rd-card-gender { font-size: 12px; padding: 8px 12px; }
+  .rd-card-detail { font-size: 13px; }
+  .rd-contact-btn { padding: 13px; font-size: 14px; margin-top: 12px; }
+
+  /* Facts — 2 per row on mobile */
+  .rd-facts { gap: 8px; }
+  .rd-fact {
+    padding: 10px 14px;
+    min-width: calc(50% - 8px);
+    flex: 1 1 calc(50% - 8px);
+  }
+  .rd-fact-val   { font-size: 18px; }
+  .rd-fact-label { font-size: 10px; }
+
+  /* Host row */
+  .rd-hosted-by  { font-size: 16px; }
+  .rd-host-avatar { width: 40px; height: 40px; font-size: 16px; }
+
+  /* Section titles */
+  .rd-section-title { font-size: 16px; }
+
+  /* Amenities — 2 col */
+  .rd-amenities { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rd-amenity   { padding: 10px 12px; font-size: 13px; }
+
+  /* Divider spacing */
+  .rd-divider { margin: 18px 0; }
+
+  /* Description */
+  .rd-description { font-size: 14px; }
+
+  /* Reviews */
+  .rd-review-card { padding: 14px; }
+  .rd-review-comment { font-size: 13px; }
+
+  /* Similar rooms — horizontal scroll on mobile */
+  .rd-similar-title { font-size: 18px; }
+  .rd-similar-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .rd-similar-img  { height: 110px; }
+  .rd-similar-name { font-size: 12px; }
+  .rd-similar-price{ font-size: 11px; }
+  .rd-similar-body { padding: 8px 10px; }
 }
