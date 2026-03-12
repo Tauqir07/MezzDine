@@ -1,13 +1,14 @@
 import bcrypt       from "bcryptjs";
 import jwt          from "jsonwebtoken";
 import crypto       from "crypto";
-import nodemailer   from "nodemailer";
+import { Resend }   from "resend";
 
 import User         from "../models/user.js";
 import Otp          from "../models/Otp.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import AppError     from "../utils/AppError.js";
 
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 console.log("GMAIL_USER:", process.env.GMAIL_USER);
 console.log("GMAIL_PASS length:", process.env.GMAIL_PASS?.length);
@@ -27,18 +28,8 @@ async function sendEmailOtp(email, otp, type = "register") {
     ? "Use the code below to reset your password. It expires in <strong>10 minutes</strong>."
     : "Use the code below to complete your MeZzDiNe registration. It expires in <strong>10 minutes</strong>.";
 
-  const transporter = nodemailer.createTransport({
-  host:   "smtp.gmail.com",
-  port:   587,
-  secure: false, // use STARTTLS
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS,
-  },
-});
-
-  await transporter.sendMail({
-    from:    `"MeZzDiNe" <${process.env.GMAIL_USER}>`,
+  await resend.emails.send({
+    from:    "MeZzDiNe <onboarding@resend.dev>",
     to:      email,
     subject,
     html: `
