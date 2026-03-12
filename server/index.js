@@ -34,7 +34,7 @@ import contactRoutes from "./routes/ContactRoutes.js";
 const app = express();
 
 app.use(cors({
-  origin: "mezzdineapp.vercel.app",
+  origin:"https:// mezzdineapp.vercel.app",
   credentials: true
 }));
 
@@ -133,10 +133,10 @@ cron.schedule("0 0 1 * *", async () => {
 });
 
 // ── Socket.io ──────────────────────────────────────────────────────────────
-const PORT   = 5001;
+const PORT = process.env.PORT || 5001;
 const server = http.createServer(app);
 const io     = new Server(server, {
-  cors: { origin: "http://localhost:5173", credentials: true }
+  cors: { origin: "https:// mezzdineapp.vercel.app", credentials: true }
 });
 
 global.io = io;
