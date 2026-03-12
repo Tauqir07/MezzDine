@@ -28,7 +28,6 @@ function avatarHue(name = "") {
   return hues[(name.charCodeAt(0) || 65) % hues.length];
 }
 
-// fix: removed dead c.messages branch — getConversations() never populates it
 function getPreview(c, userId) {
   const lm = c.lastMessage;
   if (!lm || typeof lm !== "object" || !lm.text) return null;
@@ -77,7 +76,6 @@ export default function ChatInbox() {
     const myId = String(user._id);
     socket.emit("join", myId);
 
-
     function handleNewMessage(msg) {
       const senderId = msg.sender?._id
         ? String(msg.sender._id)
@@ -90,7 +88,6 @@ export default function ChatInbox() {
       );
       if (!convoId) return;
 
-      // update unread badge
       setUnread(prev => ({
         ...prev,
         [convoId]: {
@@ -100,7 +97,6 @@ export default function ChatInbox() {
         },
       }));
 
-      // update live preview text on conversation row
       setConvos(prev =>
         prev.map(c =>
           String(c._id) === convoId
@@ -109,7 +105,6 @@ export default function ChatInbox() {
         )
       );
 
-      // show toast
       const senderName = msg.sender?.name || "Someone";
       const toastId    = `${convoId}-${Date.now()}`;
 
@@ -123,12 +118,11 @@ export default function ChatInbox() {
 
     socket.on("newMessage", handleNewMessage);
 
-    // fix: merged toast timer cleanup into socket cleanup
     return () => {
       socket.off("newMessage", handleNewMessage);
       Object.values(toastTimers.current).forEach(clearTimeout);
     };
-  }, [user._id]); // fix: added user._id as dependency
+  }, [user._id]);
 
   // ── Toast helpers ─────────────────────────────────────────────────────────
 
@@ -144,11 +138,18 @@ export default function ChatInbox() {
     navigate(`/chat/${toast.convoId}`);
   }
 
-  // ── Open conversation — show preview, do NOT navigate ─────────────────────
-  // fix: removed navigate() so right panel actually renders
+  // ── Open conversation ─────────────────────────────────────────────────────
+  // On mobile: navigate directly. On desktop: show preview panel.
 
   async function openChat(id) {
     setUnread(prev => ({ ...prev, [id]: { count: 0 } }));
+
+    // ── FIX: navigate directly on mobile ──
+    if (window.innerWidth <= 768) {
+      navigate(`/chat/${id}`);
+      return;
+    }
+
     setActiveId(id);
     setPreviewMsgs([]);
     setPreviewLoading(true);
@@ -167,7 +168,9 @@ export default function ChatInbox() {
   const totalUnread  = Object.values(unread).reduce((sum, v) => sum + (v?.count || 0), 0);
   const activeConvo  = convos.find(c => c._id === activeId);
   const activeOther  = activeConvo?.participants?.find(p => String(p._id) !== String(user._id));
-if (loading) return <PageLoader />;
+
+  if (loading) return <PageLoader />;
+
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
@@ -282,7 +285,7 @@ if (loading) return <PageLoader />;
         </div>
       </div>
 
-      {/* ── RIGHT PANEL ── */}
+      {/* ── RIGHT PANEL (desktop only) ── */}
       <div className="inbox-detail">
         {!activeOther ? (
           <div className="inbox-detail-inner">
