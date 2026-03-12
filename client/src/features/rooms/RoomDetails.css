@@ -413,17 +413,15 @@
 
 @media (max-width: 900px) {
   .rd-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 0;
   }
-
-  /* Move booking card above content on tablet/mobile */
   .rd-right {
     position: static;
-    order: -1;
-    margin-bottom: 24px;
+    width: 100%;
+    margin-top: 8px;
   }
-
   .rd-title { font-size: 26px; }
 }
 

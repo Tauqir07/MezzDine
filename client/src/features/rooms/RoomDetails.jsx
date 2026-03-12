@@ -9,14 +9,16 @@ import { useAuth } from "../../context/authContext";
 import Kitchenmap from "../../map/Kitchenmap";
 
 const AMENITY_ICONS = {
-  wifi:      { icon: "📶", label: "WiFi"      },
-  kitchen:   { icon: "🍳", label: "Kitchen"   },
-  bathroom:  { icon: "🚿", label: "Bathroom"  },
-  ac:        { icon: "❄️", label: "AC"         },
-  parking:   { icon: "🅿️", label: "Parking"   },
-  laundry:   { icon: "🧺", label: "Laundry"   },
-  furnished: { icon: "🛋️", label: "Furnished" },
-  geyser:    { icon: "🔥", label: "Geyser"    },
+  wifi:            { icon: "📶", label: "WiFi"            },
+  kitchen:         { icon: "🍳", label: "Kitchen"         },
+  bathroom:        { icon: "🚿", label: "Bathroom"        },
+  ac:              { icon: "❄️", label: "AC"               },
+  parking:         { icon: "🅿️", label: "Parking"         },
+  laundry:         { icon: "🧺", label: "Laundry"         },
+  furnished:       { icon: "🛋️", label: "Furnished"       },
+  geyser:          { icon: "🔥", label: "Geyser"          },
+  tv:              { icon: "📺", label: "TV"              },
+  "washing machine":{ icon: "🫧", label: "Washing Machine" },
 };
 
 const GENDER_CONFIG = {
@@ -25,6 +27,22 @@ const GENDER_CONFIG = {
   family: { label: "Only Family",      icon: "👨‍👩‍👧‍👦", color: "#f59e0b", bg: "#fffbeb" },
   any:    { label: "Open to Everyone", icon: "🤝", color: "#16a34a", bg: "#f0fdf4" },
 };
+
+// ── Helper: parse amenities whether stored as array or JSON string ──
+function parseAmenities(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      // single string value
+      return [raw];
+    }
+  }
+  return [];
+}
 
 export default function RoomDetails() {
 
@@ -72,30 +90,25 @@ export default function RoomDetails() {
   }
 
   async function contactOwner() {
-  if (chatLoading || !room?.ownerId) return;
-  setChatLoading(true);
-  try {
-    const receiverId = room.ownerId?._id
-      ? String(room.ownerId._id)
-      : String(room.ownerId);
+    if (chatLoading || !room?.ownerId) return;
+    setChatLoading(true);
+    try {
+      const receiverId = room.ownerId?._id
+        ? String(room.ownerId._id)
+        : String(room.ownerId);
 
-    if (!receiverId) return;  // ← guard against empty string
+      if (!receiverId) return;
 
-    const res = await startConversation(receiverId);
-
-    const convoId = res.data?._id;
-    if (!convoId) {
-      console.error("No conversation ID returned", res.data);
-      return;
+      const res = await startConversation(receiverId);
+      const convoId = res.data?._id;
+      if (!convoId) { console.error("No conversation ID returned", res.data); return; }
+      navigate(`/chat/${convoId}`);
+    } catch {
+      alert("Failed to start chat");
+    } finally {
+      setChatLoading(false);
     }
-
-    navigate(`/chat/${convoId}`);
-  } catch {
-    alert("Failed to start chat");
-  } finally {
-    setChatLoading(false);
   }
-}
 
   if (loading) return <PageLoader />;
   if (!room)   return <p>Room not found</p>;
@@ -108,7 +121,8 @@ export default function RoomDetails() {
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
-  const gender = GENDER_CONFIG[room.genderPreference?.toLowerCase()] || GENDER_CONFIG["any"]
+  const gender   = GENDER_CONFIG[room.genderPreference?.toLowerCase()] || GENDER_CONFIG["any"];
+  const amenities = parseAmenities(room.amenities); // ← FIX: always an array
 
   return (
     <div className="rd-page">
@@ -244,13 +258,14 @@ export default function RoomDetails() {
             )}
 
             {/* Amenities */}
-            {room.amenities?.length > 0 && (
+            {amenities.length > 0 && (
               <>
                 <div className="rd-section">
                   <h3 className="rd-section-title">What's included</h3>
                   <div className="rd-amenities">
-                    {room.amenities.map((a, i) => {
-                      const info = AMENITY_ICONS[a] || { icon: "✓", label: a };
+                    {amenities.map((a, i) => {
+                      const key  = a.toLowerCase().trim();
+                      const info = AMENITY_ICONS[key] || { icon: "✓", label: a };
                       return (
                         <div key={i} className="rd-amenity">
                           <span className="rd-amenity-icon">{info.icon}</span>
@@ -271,7 +286,7 @@ export default function RoomDetails() {
                 kitchenLat={room.location?.lat}
                 kitchenLng={room.location?.lng}
                 kitchenName={room.title}
-                 label="Room location"
+                label="Room location"
                 height={400}
               />
             </div>
