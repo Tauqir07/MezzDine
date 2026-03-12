@@ -34,7 +34,7 @@ import contactRoutes from "./routes/ContactRoutes.js";
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: "mezzdineapp.vercel.app",
   credentials: true
 }));
 
