@@ -233,7 +233,7 @@ export default function Home() {
 
       {/* ── CTA ── */}
       {!loading && !user && (
-        <section className="hm-cta reveal">
+        <section className="hm-cta">
           <div className="hm-cta-inner">
             <div className="hm-cta-blob" />
             <div className="hm-section-tag hm-section-tag--light">Get started today</div>
