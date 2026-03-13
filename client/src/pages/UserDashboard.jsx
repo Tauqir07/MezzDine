@@ -288,7 +288,7 @@ export default function UserDashboard() {
                   <button className="ud-pause-drawer-close" onClick={() => setShowPausePanel(false)}>✕</button>
                 </div>
                 <div style={{ padding: "0 4px 20px" }}>
-                  <PausePanel
+                  <Pausepanel
                      kitchenId={kitchenId}
                      mealPlan={subscription.mealPlan}
                      preferredMeal={subscription.preferredMeal}
