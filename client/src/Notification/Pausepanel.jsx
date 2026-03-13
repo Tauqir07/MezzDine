@@ -31,6 +31,16 @@ function isFullDay(meals) {
 function isPast(dateStr)  { return dateStr < todayStr(); }
 function isToday(dateStr) { return dateStr === todayStr(); }
 
+// ✅ Compute which meals this subscriber is allowed to pause
+function getAllowedMeals(mealPlan, preferredMeal) {
+  switch (mealPlan) {
+    case "one":   return [preferredMeal].filter(Boolean);
+    case "two":   return ["lunch", "dinner"];
+    case "three": return ["breakfast", "lunch", "dinner"];
+    default:      return ["breakfast", "lunch", "dinner"]; // owner / unknown — show all
+  }
+}
+
 /* ── Meal badge pill ─────────────────────────────────────── */
 function MealBadge({ meal }) {
   const c    = MEAL_COLORS[meal] || {};
@@ -46,7 +56,7 @@ function MealBadge({ meal }) {
   );
 }
 
-/* ── Shared pause list (used in both modes) ──────────────── */
+/* ── Shared pause list ──────────────────────────────────── */
 function PauseHistory({ pauses, isOwner, onRemove }) {
   const [showPast, setShowPast] = useState(false);
   const sorted   = [...pauses].sort((a, b) => a.date.localeCompare(b.date));
@@ -55,8 +65,6 @@ function PauseHistory({ pauses, isOwner, onRemove }) {
 
   return (
     <div className="pp-history">
-
-      {/* ── Upcoming ── */}
       {upcoming.length > 0 && (
         <>
           <p className="pp-active-title">
@@ -83,7 +91,6 @@ function PauseHistory({ pauses, isOwner, onRemove }) {
                     }
                   </div>
                 </div>
-                {/* Only show Remove for own pauses (not kitchen-applied, not customer-card view) */}
                 {p.source !== "kitchen" && !p.readOnly && onRemove && (
                   <button className="pp-remove-btn" onClick={() => onRemove(p.date)}>
                     Remove
@@ -95,14 +102,12 @@ function PauseHistory({ pauses, isOwner, onRemove }) {
         </>
       )}
 
-      {/* ── No upcoming ── */}
       {upcoming.length === 0 && (
         <p style={{ padding:"10px 14px", fontSize:12, color:"#9CA3AF", margin:0 }}>
           No upcoming pauses.
         </p>
       )}
 
-      {/* ── Past ── */}
       {past.length > 0 && (
         <>
           <button className="pp-past-toggle" onClick={() => setShowPast(s => !s)}>
@@ -139,40 +144,45 @@ function PauseHistory({ pauses, isOwner, onRemove }) {
    MAIN COMPONENT
 
    Props:
-     kitchenId  — always required
-     isOwner    — true when used in KitchenDashboard's own pause panel
-     userId     — pass ONLY when kitchen is viewing a subscriber's card
-                  (activates "card view" mode — just a dropdown, no controls)
-     userName   — display name for the subscriber (optional, for card view)
+     kitchenId     — always required
+     isOwner       — true when used in KitchenDashboard
+     userId        — pass when kitchen is viewing a subscriber card
+     userName      — display name for subscriber (card view)
+     mealPlan      — "one" | "two" | "three" (customer only)
+     preferredMeal — "breakfast"|"lunch"|"dinner" (only for mealPlan="one")
    ══════════════════════════════════════════════════════════ */
 export default function PausePanel({
   kitchenId,
-  isOwner  = false,
-  userId   = null,   // ← NEW: when set, shows subscriber card dropdown only
-  userName = "",
+  isOwner      = false,
+  userId       = null,
+  userName     = "",
+  mealPlan     = null,   // ✅ NEW
+  preferredMeal = null,  // ✅ NEW
 }) {
-  // ── Card view mode (kitchen viewing a specific subscriber) ──
   const isCardView = Boolean(userId);
 
   const endpoint = isOwner
     ? `/notifications/kitchen-pause/${kitchenId}`
     : `/notifications/pause/${kitchenId}`;
 
-  // ── Shared state ──
   const [pauseRecord,   setPauseRecord]   = useState(null);
   const [kitchenPauses, setKitchenPauses] = useState([]);
   const [historyOpen,   setHistoryOpen]   = useState(false);
   const [fetched,       setFetched]       = useState(false);
   const [loadingCard,   setLoadingCard]   = useState(false);
 
-  // ── Full panel state (not used in card view) ──
   const [selectedDate,  setSelectedDate]  = useState(todayStr());
   const [selectedMeals, setSelectedMeals] = useState([]);
   const [fullDay,       setFullDay]       = useState(true);
   const [status,        setStatus]        = useState(null);
   const [errMsg,        setErrMsg]        = useState("");
 
-  // ── Fetch for full panel (customer / kitchen owner panel) ──
+  // ✅ Compute allowed meals for this subscriber
+  // isOwner gets all meals (kitchen can close any meal)
+  const allowedMeals = isOwner
+    ? ALL_MEALS
+    : getAllowedMeals(mealPlan, preferredMeal);
+
   useEffect(() => {
     if (isCardView || !kitchenId) return;
     api.get(endpoint)
@@ -180,7 +190,6 @@ export default function PausePanel({
       .catch(() => setPauseRecord(null));
   }, [kitchenId, isCardView]);
 
-  // Customer: also fetch kitchen's pauses
   useEffect(() => {
     if (isCardView || isOwner || !kitchenId) return;
     api.get(`/notifications/kitchen-pause/${kitchenId}`)
@@ -191,14 +200,12 @@ export default function PausePanel({
       .catch(() => setKitchenPauses([]));
   }, [kitchenId, isOwner, isCardView]);
 
-  // ── Card view: lazy fetch on first open ──
   async function loadCardData() {
     if (fetched) return;
     setLoadingCard(true);
     try {
       const res = await api.get(`/notifications/pause/${kitchenId}/user/${userId}`);
       const d   = res.data.data;
-
       const customerMeals = d.customerMeals || [];
       const customerRows  = (d.customerDates || []).map(date => ({
         date, meals: customerMeals, source: "customer", readOnly: true,
@@ -206,8 +213,6 @@ export default function PausePanel({
       const kitchenRows = (d.kitchenDates || []).map(p => ({
         date: p.date, meals: p.meals || [], source: "kitchen", readOnly: true,
       }));
-
-      // Store in pauseRecord shape for PauseHistory to consume
       setPauseRecord({ merged: [...customerRows, ...kitchenRows] });
       setFetched(true);
     } catch {
@@ -222,15 +227,12 @@ export default function PausePanel({
     setHistoryOpen(o => !o);
   }
 
-  // ── Build merged pause list ──
   const allPauses = (() => {
     if (isCardView) return pauseRecord?.merged || [];
-
     const raw = pauseRecord?.dates || [];
     const ownPauses = isOwner
       ? raw.map(p => ({ date: p.date, meals: p.meals || [], source: null }))
       : raw.map(d => ({ date: d, meals: pauseRecord?.meals || [], source: "customer" }));
-
     if (isOwner) return ownPauses;
     return [
       ...ownPauses,
@@ -242,6 +244,8 @@ export default function PausePanel({
   const totalUpcoming = allPauses.filter(p => !isPast(p.date)).length;
 
   function toggleMeal(meal) {
+    // ✅ Silently ignore if meal not in allowedMeals (shouldn't happen since button is disabled)
+    if (!allowedMeals.includes(meal)) return;
     setSelectedMeals(prev =>
       prev.includes(meal) ? prev.filter(m => m !== meal) : [...prev, meal]
     );
@@ -255,6 +259,14 @@ export default function PausePanel({
         setErrMsg("Select at least one meal or choose full day.");
         setStatus(null); return;
       }
+
+      // ✅ Frontend guard: make sure all selected meals are allowed
+      const invalid = meals.filter(m => !allowedMeals.includes(m));
+      if (invalid.length) {
+        setErrMsg(`You can't pause ${invalid.join(", ")} — not part of your meal plan.`);
+        setStatus(null); return;
+      }
+
       const res = await api.post(endpoint, { dates: [selectedDate], meals });
       setPauseRecord(res.data.data);
       setStatus("saved");
@@ -281,10 +293,7 @@ export default function PausePanel({
     }
   }
 
-  /* ════════════════════════════════════════
-     CARD VIEW — just a dropdown button
-     Used inside each subscriber card in KitchenDashboard
-  ════════════════════════════════════════ */
+  /* ── CARD VIEW ── */
   if (isCardView) {
     return (
       <div className="pp-history-wrap" style={{ marginTop: 10 }}>
@@ -310,11 +319,7 @@ export default function PausePanel({
                 Fetching pauses for {userName || "this customer"}…
               </div>
             ) : (
-              <PauseHistory
-                pauses={allPauses}
-                isOwner={false}
-                onRemove={null} // kitchen can't remove customer's pauses from card view
-              />
+              <PauseHistory pauses={allPauses} isOwner={false} onRemove={null} />
             )}
           </>
         )}
@@ -322,9 +327,7 @@ export default function PausePanel({
     );
   }
 
-  /* ════════════════════════════════════════
-     FULL PANEL VIEW — customer or kitchen owner
-  ════════════════════════════════════════ */
+  /* ── FULL PANEL VIEW ── */
   return (
     <div className="pp-wrap">
       <h3 className="pp-title">
@@ -336,13 +339,26 @@ export default function PausePanel({
           : "Skip delivery for a specific date. Requests must be made before the cutoff time."}
       </p>
 
-      <div className="pp-cutoffs">
-        {Object.entries(MEAL_INFO).map(([key, info]) => (
-          <div key={key} className="pp-cutoff-item">
-            <span>{info.emoji} {info.label}</span>
-            <span className="pp-cutoff-note">{info.cutoffNote}</span>
+      {/* ✅ Show subscriber's meal plan info */}
+      {!isOwner && mealPlan && (
+        <div className="pp-plan-info">
+          <span className="pp-plan-label">Your plan:</span>
+          <div className="pp-plan-meals">
+            {allowedMeals.map(m => <MealBadge key={m} meal={m} />)}
           </div>
-        ))}
+        </div>
+      )}
+
+      <div className="pp-cutoffs">
+        {Object.entries(MEAL_INFO)
+          // ✅ Only show cutoff info for meals in the subscriber's plan
+          .filter(([key]) => isOwner || allowedMeals.includes(key))
+          .map(([key, info]) => (
+            <div key={key} className="pp-cutoff-item">
+              <span>{info.emoji} {info.label}</span>
+              <span className="pp-cutoff-note">{info.cutoffNote}</span>
+            </div>
+          ))}
       </div>
 
       <label className="pp-label">Select date</label>
@@ -379,15 +395,21 @@ export default function PausePanel({
 
       {!fullDay && (
         <div className="pp-meals">
-          {Object.entries(MEAL_INFO).map(([key, info]) => (
-            <button
-              key={key}
-              className={`pp-meal-btn ${selectedMeals.includes(key) ? "active" : ""}`}
-              onClick={() => toggleMeal(key)}
-            >
-              {info.emoji} {info.label}
-            </button>
-          ))}
+          {Object.entries(MEAL_INFO).map(([key, info]) => {
+            const allowed = allowedMeals.includes(key);
+            return (
+              <button
+                key={key}
+                className={`pp-meal-btn ${selectedMeals.includes(key) ? "active" : ""} ${!allowed ? "pp-meal-btn--disabled" : ""}`}
+                onClick={() => toggleMeal(key)}
+                disabled={!allowed}
+                title={!allowed ? `Not part of your meal plan` : ""}
+              >
+                {info.emoji} {info.label}
+                {!allowed && <span className="pp-meal-na"> · N/A</span>}
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -401,7 +423,6 @@ export default function PausePanel({
         <p className="pp-feedback pp-feedback--ok">✓ Saved successfully</p>
       )}
 
-      {/* ── Pause History Dropdown ── */}
       {allPauses.length > 0 && (
         <div className="pp-history-wrap">
           <button className="pp-history-toggle" onClick={toggleHistory}>

@@ -2,7 +2,8 @@ import Subscription from "../models/Subscription.js";
 import asyncHandler  from "../utils/asyncHandler.js";
 import Menu          from "../models/KitchenMenu.js";
 import Notification  from "../models/Notification.js";
-import MealPause from "../models/MealPause.js";
+import MealPause     from "../models/MealPause.js";
+
 // GET MY SUBSCRIPTIONS
 export const getMySubscription = asyncHandler(async (req, res) => {
   const subs = await Subscription
@@ -21,10 +22,18 @@ export const getMySubscription = asyncHandler(async (req, res) => {
   res.json({ success: true, data: result });
 });
 
+// ── Helper: which meals does this subscription include? ──
+function getAllowedMeals(sub) {
+  switch (sub.mealPlan) {
+    case "one":   return [sub.preferredMeal].filter(Boolean); // only their chosen meal
+    case "two":   return ["lunch", "dinner"];                 // always lunch + dinner
+    case "three": return ["breakfast", "lunch", "dinner"];    // all three
+    default:      return [];
+  }
+}
+
 // PAUSE SUBSCRIPTION
-// Body: { meals: ["breakfast","lunch","dinner"], days: 3 }
-// meals → which meals to pause (required)
-// days  → how many days (optional — omit for indefinite)
+// Body: { meals: ["breakfast","lunch","dinner"], days: 3, kitchenId }
 export const pauseSubscription = asyncHandler(async (req, res) => {
   const { meals = [], days = null, kitchenId } = req.body;
 
@@ -39,11 +48,22 @@ export const pauseSubscription = asyncHandler(async (req, res) => {
   if (!sub) return res.status(404).json({ message: "No subscription found" });
   if (sub.isPaused) return res.status(400).json({ message: "Already paused" });
 
-  sub.isPaused       = true;
-  sub.pausedAt       = new Date();
-  sub.pauseDays      = days ? Number(days) : null;
-  sub.pauseEndsAt    = days ? new Date(Date.now() + Number(days) * 864e5) : null;
-  sub.pausedMeals    = {
+  // ✅ Validate: only allow pausing meals the subscriber actually has
+  const allowedMeals   = getAllowedMeals(sub);
+  const invalidMeals   = meals.filter(m => !allowedMeals.includes(m));
+
+  if (invalidMeals.length) {
+    return res.status(400).json({
+      message: `You can't pause ${invalidMeals.join(", ")} — not part of your meal plan.`,
+      allowedMeals,
+    });
+  }
+
+  sub.isPaused    = true;
+  sub.pausedAt    = new Date();
+  sub.pauseDays   = days ? Number(days) : null;
+  sub.pauseEndsAt = days ? new Date(Date.now() + Number(days) * 864e5) : null;
+  sub.pausedMeals = {
     breakfast: meals.includes("breakfast"),
     lunch:     meals.includes("lunch"),
     dinner:    meals.includes("dinner"),
@@ -62,7 +82,7 @@ export const pauseSubscription = asyncHandler(async (req, res) => {
       title:       "⏸ Subscriber paused meals",
       message:     `A subscriber paused ${mealList} ${dayText}.`,
       kitchenId:   sub.kitchenId,
-    }).catch(() => {}); // don't fail if notification errors
+    }).catch(() => {});
   }
 
   res.json({ success: true, data: sub });
@@ -80,10 +100,8 @@ export const resumeSubscription = asyncHandler(async (req, res) => {
   if (!sub)          return res.status(404).json({ message: "No subscription found" });
   if (!sub.isPaused) return res.status(400).json({ message: "Subscription is not paused" });
 
-  // extend endDate by the paused duration
   const pausedDuration = Date.now() - new Date(sub.pausedAt).getTime();
-  sub.endDate    = new Date(sub.endDate.getTime() + pausedDuration);
-
+  sub.endDate     = new Date(sub.endDate.getTime() + pausedDuration);
   sub.isPaused    = false;
   sub.pausedAt    = null;
   sub.pauseDays   = null;
@@ -96,7 +114,6 @@ export const resumeSubscription = asyncHandler(async (req, res) => {
 });
 
 // GET KITCHEN SUBSCRIBERS (for owner dashboard)
-// REPLACE getKitchenSubscribers with:
 export const getKitchenSubscribers = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
 
@@ -113,7 +130,7 @@ export const getKitchenSubscribers = asyncHandler(async (req, res) => {
 
     return {
       ...sub.toObject(),
-      isPaused:       sub.isPaused || hasActivePause,
+      isPaused:        sub.isPaused || hasActivePause,
       mealPauseRecord: pause || null,
     };
   });
