@@ -289,10 +289,10 @@ export default function UserDashboard() {
                 </div>
                 <div style={{ padding: "0 4px 20px" }}>
                   <Pausepanel
-                     kitchenId={kitchenId}
-                     mealPlan={subscription.mealPlan}
-                     preferredMeal={subscription.preferredMeal}
-                    />
+                  kitchenId={kitchen?._id}
+                   mealPlan={sub.mealPlan}
+                  preferredMeal={sub.preferredMeal}
+                   />
                 </div>
               </div>
             </div>
