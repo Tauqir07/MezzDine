@@ -386,7 +386,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) throw new AppError("Current password is incorrect", 401);
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    await User.findByIdAndUpdate(req.user.id, { password: await bcrypt.hash(newPassword, 10) });
   }
 
   await user.save();
