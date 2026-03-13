@@ -32,11 +32,12 @@ function handleUpload(maxCount) {
         });
       }
       if (err) {
-        return res.status(500).json({
-          success: false,
-          message: "File upload failed",
-        });
-      }
+  console.error("🔥 UPLOAD ERROR:", err); // ← add this
+  return res.status(500).json({
+    success: false,
+    message: err.message, // ← show real error temporarily
+  });
+}
       next();
     });
   };
