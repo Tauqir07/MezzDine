@@ -30,6 +30,7 @@ import Subscription from "./models/Subscription.js";
 import MealPause    from "./models/MealPause.js";
 import reportRoutes from "./routes/ReportRoutes.js";
 import contactRoutes from "./routes/ContactRoutes.js";
+import pushRoutes from "./routes/PushRoutes.js";
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use("/api/visits",          visitRoutes);
 app.use("/api/payments",        paymentRoutes);   // ← was PaymentRoutes (bug fix)
 app.use("/api/report", reportRoutes);
 app.use("/api/contact",   contactRoutes);
+app.use("/api/push", pushRoutes);
 
 
 
