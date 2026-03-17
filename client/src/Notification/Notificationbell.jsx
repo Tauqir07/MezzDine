@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../api/axios";
+import socket from "../socket";
+import { useAuth } from "../context/authContext";
 import "./Notification.css";
-import NotificationsPage from "../pages/NotificationPage";
 
 const TYPE_ICON = {
   message:      "💬",
   subscription: "🎉",
+  unsubscription:"👋",
   announcement: "📢",
   pause:        "⏸",
 };
@@ -17,22 +19,53 @@ export default function NotificationBell() {
   const [open, setOpen]                   = useState(false);
   const dropRef  = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
 
   async function fetchNotifications() {
     try {
       const res = await api.get("/notifications/my");
-      setNotifications(res.data.data.notifications);
-      setUnread(res.data.data.unreadCount);
+      const all = res.data.data.notifications || [];
+
+      // messages go to Inbox only — exclude from bell
+      const filtered = all.filter(n => n.type !== "message");
+
+      setNotifications(filtered);
+      setUnread(filtered.filter(n => !n.isRead).length);
     } catch {
       // silently fail
     }
   }
 
+  // fetch on mount + every 30s
   useEffect(() => {
     fetchNotifications();
     const t = setInterval(fetchNotifications, 30_000);
     return () => clearInterval(t);
   }, []);
+
+  // real-time: new non-message notification arrives via socket
+  useEffect(() => {
+    if (!user?._id) return;
+
+    function handleNewNotification(notif) {
+      if (String(notif.recipientId) !== String(user._id)) return;
+      if (notif.type === "message") return; // messages go to inbox only
+      setNotifications(prev => [notif, ...prev]);
+      setUnread(prev => prev + 1);
+    }
+
+    socket.on("newNotification", handleNewNotification);
+    return () => socket.off("newNotification", handleNewNotification);
+  }, [user?._id]);
+
+  // clear badge when visiting /notifications
+  useEffect(() => {
+    if (location.pathname === "/notifications") {
+      setUnread(0);
+      setOpen(false);
+    }
+  }, [location.pathname]);
 
   // close on outside click
   useEffect(() => {

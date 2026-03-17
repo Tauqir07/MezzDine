@@ -64,8 +64,16 @@ export const sendAnnouncement = asyncHandler(async (req, res) => {
     kitchenId,
   }));
 
-  await Notification.insertMany(notifications);
-  res.json({ success: true, sent: notifications.length });
+  const saved = await Notification.insertMany(notifications);
+
+  // emit to each subscriber in real time
+  if (global.io) {
+    saved.forEach(n => {
+      global.io.to(String(n.recipientId)).emit("newNotification", n.toObject());
+    });
+  }
+
+  res.json({ success: true, sent: saved.length });
 });
 
 /* ─────────────────────────────────────────
@@ -111,7 +119,6 @@ export const pauseMeals = asyncHandler(async (req, res) => {
   const sub = await Subscription.findOne({ userId: req.user.id, kitchenId });
   if (!sub) throw new AppError("You are not subscribed to this kitchen", 403);
 
-  // ✅ Cap to the meals in their actual plan
   const mealsToCheck = meals?.length
     ? meals
     : ["breakfast", "lunch", "dinner"].slice(0, MEALS_PER_PLAN[sub.mealPlan] || 3);
@@ -158,13 +165,17 @@ export const pauseMeals = asyncHandler(async (req, res) => {
     User.findById(req.user.id).select("name phone"),
   ]);
 
-  await Notification.create({
+  const notif = await Notification.create({
     recipientId: kitchen.ownerId,
-    type: "pause",
-    title: "🍽 Meal Pause Request",
-    message: `${user.name} (${user.phone || "no phone"}) paused ${mealsToCheck.join(", ")} for ${dates.join(", ")}.`,
+    type:        "pause",
+    title:       "🍽 Meal Pause Request",
+    message:     `${user.name} (${user.phone || "no phone"}) paused ${mealsToCheck.join(", ")} for ${dates.join(", ")}.`,
     kitchenId,
   });
+
+  if (global.io) {
+    global.io.to(String(notif.recipientId)).emit("newNotification", notif.toObject());
+  }
 
   res.json({ success: true, data: pause });
 });
@@ -178,7 +189,6 @@ export const resumeMeals = asyncHandler(async (req, res) => {
 
   if (!kitchenId) throw new AppError("Kitchen ID is required", 400);
 
-  // ── Block removal after cutoff ──
   if (dates?.length) {
     const today  = new Date().toISOString().slice(0, 10);
     const locked = dates.filter(d => {
@@ -194,7 +204,6 @@ export const resumeMeals = asyncHandler(async (req, res) => {
     }
   }
 
-  // ── Reverse endDate extension ──
   if (dates?.length) {
     const sub         = await Subscription.findOne({ userId: req.user.id, kitchenId });
     const pauseRecord = await MealPause.findOne({ userId: req.user.id, kitchenId });
@@ -226,13 +235,17 @@ export const resumeMeals = asyncHandler(async (req, res) => {
   ]);
 
   if (kitchen) {
-    await Notification.create({
+    const notif = await Notification.create({
       recipientId: kitchen.ownerId,
       type:        "pause",
       title:       "✅ Meal Pause Cancelled",
       message:     `${user.name} (${user.phone || "no phone"}) resumed their meals for ${dates?.join(", ") || "a date"}.`,
       kitchenId,
     });
+
+    if (global.io) {
+      global.io.to(String(notif.recipientId)).emit("newNotification", notif.toObject());
+    }
   }
 
   res.json({ success: true });
@@ -245,7 +258,6 @@ export const getMyPause = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
   if (!kitchenId) throw new AppError("Kitchen ID is required", 400);
 
-  // Simply fetch — history kept until renewal, no auto-delete
   const pause = await MealPause.findOne({ userId: req.user.id, kitchenId });
 
   res.json({ success: true, data: pause || null });
@@ -253,9 +265,6 @@ export const getMyPause = asyncHandler(async (req, res) => {
 
 /* ─────────────────────────────────────────
    GET /notifications/kitchen-pause/:kitchenId
-   ✅ FIXED — owner AND subscribers can both read kitchen pauses
-   Owner  → manages the list
-   Customer → reads it to show "🍳 By Kitchen" in their pause history
 ───────────────────────────────────────── */
 export const getKitchenPause = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
@@ -328,7 +337,14 @@ export const pauseKitchen = asyncHandler(async (req, res) => {
       message:     `The kitchen has paused ${mealLabel} on ${dates.join(", ")}. Your subscription has been extended.`,
       kitchenId,
     }));
-    await Notification.insertMany(notifications);
+
+    const saved = await Notification.insertMany(notifications);
+
+    if (global.io) {
+      saved.forEach(n => {
+        global.io.to(String(n.recipientId)).emit("newNotification", n.toObject());
+      });
+    }
   }
 
   res.json({ success: true, data: { dates: kitchen.pausedDates } });
@@ -370,7 +386,6 @@ export const resumeKitchen = asyncHandler(async (req, res) => {
 
 /* ─────────────────────────────────────────
    DELETE /notifications/pause-history/:kitchenId
-   Customer clears their OWN pause history after paying
 ───────────────────────────────────────── */
 export const clearMyPauseHistory = asyncHandler(async (req, res) => {
   const { kitchenId } = req.params;
@@ -386,7 +401,6 @@ export const clearMyPauseHistory = asyncHandler(async (req, res) => {
 
 /* ─────────────────────────────────────────
    DELETE /notifications/pause-history/:kitchenId/user/:userId
-   Kitchen owner clears a specific customer's pause history after receiving payment
 ───────────────────────────────────────── */
 export const clearUserPauseHistory = asyncHandler(async (req, res) => {
   const { kitchenId, userId } = req.params;
@@ -406,9 +420,9 @@ export const clearUserPauseHistory = asyncHandler(async (req, res) => {
 
   res.json({ success: true, message: "Customer pause history cleared after payment." });
 });
+
 /* ─────────────────────────────────────────
    GET /notifications/pause/:kitchenId/user/:userId
-   Kitchen owner reads a specific customer's pause history
 ───────────────────────────────────────── */
 export const getUserPauseForKitchen = asyncHandler(async (req, res) => {
   const { kitchenId, userId } = req.params;
