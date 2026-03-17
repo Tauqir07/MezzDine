@@ -34,13 +34,13 @@ import SafetyGuidelines     from "./footer/Safety/SafetyGuidelines";
 import CommunityStandards   from "./footer/Community/CommunityStandards";
 import ReportProblem        from "./footer/report/ReportProblem";
 import ContactPage from "./footer/Contact/ContactPage";
-
+import ScrollToTop from "./scrolltotop/scrolltotop";
 function App(){
 useGPSLocation();
 return(
 
 <BrowserRouter>
-
+<ScrollToTop />
 <Navbar/>
 <div style={{ paddingTop: "64px" }}></div>
 <Routes>
