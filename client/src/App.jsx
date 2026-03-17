@@ -37,14 +37,14 @@ import ContactPage        from "./footer/Contact/ContactPage";
 
 import ScrollToTop          from "./scrolltotop/scrolltotop";
 import useGPSLocation       from "./hooks/useGPSLocation";
-import usePushNotifications from "./hooks/UsePushNotification";
+import UsePushNotifications from "./hooks/UsePushNotification";
 
 import "leaflet/dist/leaflet.css";
 
 function App() {
   const { user } = useAuth();   // ← auth context is available here since AuthProvider wraps App
   useGPSLocation();
-  usePushNotifications(user);   // ← registers service worker + asks permission on login
+  UsePushNotifications(user);   // ← registers service worker + asks permission on login
 
   return (
     <BrowserRouter>
