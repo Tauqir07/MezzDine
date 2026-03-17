@@ -39,7 +39,18 @@ app.use(cors({
 }));
 
 app.use(express.json());
+// ping yourself every 14 minutes to prevent sleep
+const BACKEND_URL = "https://mezzdine.onrender.com";
 
+setInterval(async () => {
+  try {
+    await fetch(`${BACKEND_URL}/api/health`);
+    console.log("Self-ping sent");
+  } catch {
+    console.log("Ping failed");
+  }
+}, 14 * 60 * 1000); // every 14 minutes
+app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 app.use("/api/auth",            authRoutes);
 app.use("/api/rooms",           roomRoutes);
 app.use("/api/kitchens",        kitchenRoutes);
@@ -55,6 +66,8 @@ app.use("/api/visits",          visitRoutes);
 app.use("/api/payments",        paymentRoutes);   // ← was PaymentRoutes (bug fix)
 app.use("/api/report", reportRoutes);
 app.use("/api/contact",   contactRoutes);
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
