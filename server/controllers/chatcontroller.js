@@ -1,13 +1,12 @@
-import Conversation from "../models/conversation.js";
+import Conversation  from "../models/conversation.js";
 import Message       from "../models/message.js";
 import Notification  from "../models/Notification.js";
 import User          from "../models/user.js";
+import { sendPushToUser } from "./PushController.js";
 
-// ── Helper: normalize user id from req.user (handles id vs _id) ──────────────
 function getUserId(req) {
   return req.user?.id || req.user?._id || null;
 }
-
 
 // START OR CREATE CONVERSATION
 export const startConversation = async (req, res) => {
@@ -35,7 +34,6 @@ export const startConversation = async (req, res) => {
   }
 };
 
-
 // SEND MESSAGE
 export const sendMessage = async (req, res) => {
   try {
@@ -56,7 +54,6 @@ export const sendMessage = async (req, res) => {
       ...(replyTo ? { replyTo } : {}),
     });
 
-    // populate sender + replyTo (with its sender name)
     const populatedMessage = await Message.findById(message._id)
       .populate("sender", "name")
       .populate({
@@ -65,7 +62,6 @@ export const sendMessage = async (req, res) => {
         populate: { path: "sender", select: "name" },
       });
 
-    // update lastMessage on conversation so inbox preview works
     await Conversation.findByIdAndUpdate(convoId, {
       lastMessage: message._id,
     });
@@ -83,7 +79,7 @@ export const sendMessage = async (req, res) => {
       updatedAt:    populatedMessage.updatedAt,
     };
 
-    // emit to every participant's socket room
+    // emit socket to every participant
     convo.participants.forEach(p => {
       global.io.to(p._id.toString()).emit("newMessage", msgToEmit);
     });
@@ -95,13 +91,26 @@ export const sendMessage = async (req, res) => {
     );
 
     if (recipient) {
-      await Notification.create({
+      // save notification to DB (for offline badge on next login)
+      const notif = await Notification.create({
         recipientId:    recipient._id,
         type:           "message",
         title:          `💬 New message from ${sender?.name || "Someone"}`,
         message:        text.length > 80 ? text.slice(0, 80) + "…" : text,
         conversationId: convoId,
         kitchenId:      null,
+      });
+
+      // emit notification socket (for online badge)
+      if (global.io) {
+        global.io.to(String(recipient._id)).emit("newNotification", notif.toObject());
+      }
+
+      // send OS push notification (works even when browser is closed)
+      await sendPushToUser(recipient._id, {
+        title: `💬 ${sender?.name || "Someone"}`,
+        body:  text.length > 80 ? text.slice(0, 80) + "…" : text,
+        url:   `/chat/${convoId}`,
       });
     }
 
@@ -111,7 +120,6 @@ export const sendMessage = async (req, res) => {
     res.status(500).json({ message: "Failed to send message" });
   }
 };
-
 
 // GET ALL CONVERSATIONS
 export const getConversations = async (req, res) => {
@@ -134,7 +142,6 @@ export const getConversations = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch conversations" });
   }
 };
-
 
 // GET ALL MESSAGES
 export const getMessages = async (req, res) => {
@@ -161,7 +168,6 @@ export const getMessages = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch messages" });
   }
 };
-
 
 // GET RECEIVER OF A CONVERSATION
 export const getReceiver = async (req, res) => {
