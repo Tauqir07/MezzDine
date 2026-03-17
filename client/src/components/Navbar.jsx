@@ -4,6 +4,7 @@ import { useAuth } from "../context/authContext";
 import socket from "../socket";
 import { getMyKitchens } from "../api/kitchen";
 import { getMyRooms } from "../api/rooms";
+import api from "../api/axios";
 import "./Navbar.css";
 import NotificationBell from "../Notification/Notificationbell";
 import EditProfileModal from "./EditProfile/EditProfile";
@@ -19,7 +20,7 @@ export default function Navbar() {
   const [menuOpen,    setMenuOpen]    = useState(false);
   const [scrolled,    setScrolled]    = useState(false);
   const [dropOpen,    setDropOpen]    = useState(false);
-  const [showEdit,    setShowEdit]    = useState(false);   // ← NEW
+  const [showEdit,    setShowEdit]    = useState(false);
 
   const dropRef = useRef(null);
 
@@ -40,7 +41,20 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // socket — inbox badge
+  // on login — fetch missed message notifications from DB
+  // this covers messages received while logged out
+  useEffect(() => {
+    if (!user?._id) return;
+    api.get("/notifications/my")
+      .then(res => {
+        const all = res.data.data.notifications || [];
+        const missedMessages = all.filter(n => n.type === "message" && !n.isRead);
+        setUnread(missedMessages.length);
+      })
+      .catch(() => {});
+  }, [user?._id]);
+
+  // socket — increment badge for new messages while logged in
   useEffect(() => {
     if (!user?._id) return;
     socket.emit("join", String(user._id));
@@ -53,8 +67,15 @@ export default function Navbar() {
     return () => socket.off("newMessage", handleNewMessage);
   }, [user?._id]);
 
+  // clear badge + mark message notifications read when visiting /chat
   useEffect(() => {
-    if (location.pathname === "/chat") setUnread(0);
+    if (location.pathname.startsWith("/chat")) {
+      setUnread(0);
+      // mark all message notifications as read in DB
+      if (user?._id) {
+        api.patch("/notifications/mark-read").catch(() => {});
+      }
+    }
     setMenuOpen(false);
     setDropOpen(false);
   }, [location.pathname]);
@@ -82,7 +103,6 @@ export default function Navbar() {
 
   const initial = (user?.name || "U")[0].toUpperCase();
 
-  // role-specific links
   const roleLinks = user?.role === "user" ? [
     { to: "/my-subscription", label: "My Subscription" },
   ] : user?.role === "kitchenOwner" ? [
@@ -100,13 +120,11 @@ export default function Navbar() {
       <nav className={`nb ${scrolled ? "nb--scrolled" : ""}`}>
         <div className="nb-inner">
 
-          {/* ── Logo ── */}
           <Link to="/" className="nb-logo">
             <span className="nb-logo-icon">🍽</span>
             <span className="nb-logo-text">MeZzDiNe</span>
           </Link>
 
-          {/* ── Centre links (desktop) ── */}
           <div className="nb-centre">
             <Link to="/rooms"    className={`nb-link ${location.pathname === "/rooms"    ? "nb-link--active" : ""}`}>Rooms</Link>
             <Link to="/kitchens" className={`nb-link ${location.pathname === "/kitchens" ? "nb-link--active" : ""}`}>Kitchens</Link>
@@ -119,7 +137,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ── Right actions (desktop) ── */}
           <div className="nb-right">
             {!loading && (
               !user ? (
@@ -131,7 +148,6 @@ export default function Navbar() {
                 <>
                   <NotificationBell />
 
-                  {/* Avatar dropdown */}
                   <div className="nb-drop-wrap" ref={dropRef}>
                     <button
                       className={`nb-avatar ${dropOpen ? "nb-avatar--open" : ""}`}
@@ -157,7 +173,6 @@ export default function Navbar() {
 
                         <div className="nb-drop-divider" />
 
-                        {/* ── Edit Profile ── */}
                         <button
                           className="nb-drop-item"
                           onClick={() => { setDropOpen(false); setShowEdit(true); }}
@@ -190,7 +205,6 @@ export default function Navbar() {
               )
             )}
 
-            {/* Hamburger (mobile) */}
             <button
               className={`nb-hamburger ${menuOpen ? "nb-hamburger--open" : ""}`}
               onClick={() => setMenuOpen(p => !p)}
@@ -203,7 +217,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* ── Mobile drawer ── */}
       {menuOpen && (
         <div className="nb-drawer-overlay" onClick={() => setMenuOpen(false)}>
           <div className="nb-drawer" onClick={e => e.stopPropagation()}>
@@ -236,7 +249,6 @@ export default function Navbar() {
                 <Link key={l.to} to={l.to} className="nb-drawer-link">{l.label}</Link>
               ))}
 
-              {/* ── Edit Profile (mobile) ── */}
               {user && (
                 <button
                   className="nb-drawer-link"
@@ -267,7 +279,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* ── Edit Profile Modal ── */}
       {showEdit && (
         <EditProfileModal
           user={user}
