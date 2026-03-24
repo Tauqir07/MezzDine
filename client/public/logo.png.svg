@@ -1,0 +1,28 @@
+<svg width="100%" viewBox="0 0 680 200" xmlns="http://www.w3.org/2000/svg">
+
+
+<g transform="translate(130, 25)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+
+  <!-- Stylized M: left arch = roof, right arch = plate -->
+  <!-- Left leg going up to roof peak -->
+  <path d="M10,120 L10,30 L50,75 L90,30 L90,120" fill="none" stroke="#1a1a1a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" style="fill:none;stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:7px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Roof triangle indicator on left arch -->
+  <line x1="10" y1="30" x2="50" y2="10" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:3px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <line x1="50" y1="10" x2="90" y2="30" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:3px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Plate arc on right side bottom -->
+  <path d="M70,110 Q90,130 110,110" fill="none" stroke="#1a1a1a" stroke-width="3.5" stroke-linecap="round" style="fill:none;stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:3.5px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <line x1="68" y1="110" x2="112" y2="110" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:3px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Fork inside right arch of M -->
+  <line x1="98" y1="50" x2="98" y2="90" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <line x1="94" y1="50" x2="94" y2="65" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <line x1="102" y1="50" x2="102" y2="65" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" style="fill:rgb(0, 0, 0);stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <path d="M94,65 Q98,72 102,65" fill="none" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" style="fill:none;stroke:rgb(26, 26, 26);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <text x="125" y="88" style="fill:rgb(26, 26, 26);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Georgia, serif;font-size:44px;font-weight:700;text-anchor:start;dominant-baseline:auto">eZzDiNe</text>
+  <text x="126" y="110" style="fill:rgb(85, 85, 85);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Georgia, serif;font-size:12px;font-weight:400;text-anchor:start;dominant-baseline:auto">ROOMS &amp; MEALS</text>
+
+</g>
+</svg>
