@@ -299,8 +299,8 @@
   .nb-right .nb-avatar { display: flex; }
 }
 .nb-logo-img {
-  width: 90px;   /* increase this */
-  height: 90px;
+  width: 200px;   /* increase this */
+  height: 200px;
   object-fit: contain;
 }
 
