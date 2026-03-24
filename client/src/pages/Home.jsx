@@ -89,7 +89,7 @@ export default function Home() {
           {/* Early access banner instead of fake stats */}
           <div className="hm-early-banner">
             <span className="hm-early-icon">🎉</span>
-            <span>
+            <span color="black">
               We're just getting started — <strong>be among the first</strong> to list your space or subscribe to a kitchen in your area.
             </span>
           </div>
