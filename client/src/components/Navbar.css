@@ -298,3 +298,14 @@
   .nb-hamburger { display: flex; }
   .nb-right .nb-avatar { display: flex; }
 }
+.nb-logo-img {
+  width: 50px;   /* increase this */
+  height: 50px;
+  object-fit: contain;
+}
+
+.nb-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

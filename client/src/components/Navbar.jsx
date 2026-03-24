@@ -121,7 +121,7 @@ export default function Navbar() {
         <div className="nb-inner">
 
           <Link to="/" className="nb-logo">
-            <span className="nb-logo-icon">🍽</span>
+            <img src="/logo.svg" alt="MeZzDiNe Logo" className="nb-logo-img" />
             <span className="nb-logo-text">MeZzDiNe</span>
           </Link>
 
