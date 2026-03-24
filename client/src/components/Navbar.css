@@ -309,3 +309,29 @@
   align-items: center;
   gap: 10px;
 }
+.nb-logo-img {
+  width: 200px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Tablet */
+@media (max-width: 1024px) {
+  .nb-logo-img {
+    width: 150px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .nb-logo-img {
+    width: 110px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .nb-logo-img {
+    width: 90px;
+  }
+}
