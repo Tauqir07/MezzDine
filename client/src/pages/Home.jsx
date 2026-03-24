@@ -3,18 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../context/authContext";
 import "../styles/Home.css";
 
-const STATS = [
-  { value: "500+", label: "Rooms Listed" },
-  { value: "120+", label: "Kitchens Active" },
-  { value: "2k+",  label: "Happy Users" },
-  { value: "4.8★", label: "Avg Rating" },
-];
-
 const FEATURES = [
   {
     icon: "🏠",
     title: "List Your Space",
-    desc: "Room providers and kitchen owners create verified listings in minutes — with images, pricing and availability.",
+    desc: "Room providers and kitchen owners create listings in minutes — with images, pricing and availability.",
   },
   {
     icon: "🔒",
@@ -43,23 +36,9 @@ const FEATURES = [
   },
 ];
 
-const TESTIMONIALS = [
-  { name: "Arjun S.", role: "Student, Bhubaneswar", text: "Found a great room near my college and subscribed to a kitchen. Saves me ₹3000 a month easily.", avatar: "A" },
-  { name: "Priya M.", role: "Kitchen Owner", text: "Managing 40 subscribers was chaos before. Now I can see who paused, who needs delivery — all in one place.", avatar: "P" },
-  { name: "Ravi K.", role: "Room Provider", text: "Added my PG listing in 10 minutes. Got my first tenant within a week. No middleman fees.", avatar: "R" },
-];
-
 export default function Home() {
   const { user, loading } = useAuth();
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
   const heroRef = useRef(null);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveTestimonial(p => (p + 1) % TESTIMONIALS.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [user]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -85,16 +64,17 @@ export default function Home() {
         </div>
 
         <div className="hm-hero-inner">
-          <div className="hm-hero-badge">🏡 Trusted by 2,000+ users in Odisha</div>
+          <div className="hm-hero-badge">🚀 Just launched · ITER & Bhubaneswar colleges</div>
 
           <h1 className="hm-hero-title">
-            Your next<br />
-            <span className="hm-hero-accent">room & meal</span><br />
-            starts here.
+            Find your<br />
+            <span className="hm-hero-accent">room & meals</span><br />
+            near college.
           </h1>
 
           <p className="hm-hero-sub">
-            Browse verified rooms, connect with home kitchens, and manage everything in one place — no middlemen, no hassle.
+            MeZzDiNe is a new platform built for students around ITER and Bhubaneswar colleges —
+            find verified rooms, subscribe to home kitchens, and manage everything in one place.
           </p>
 
           <div className="hm-hero-cta">
@@ -106,14 +86,12 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="hm-stats">
-            {STATS.map((s, i) => (
-              <div key={i} className="hm-stat">
-                <div className="hm-stat-val">{s.value}</div>
-                <div className="hm-stat-label">{s.label}</div>
-              </div>
-            ))}
+          {/* Early access banner instead of fake stats */}
+          <div className="hm-early-banner">
+            <span className="hm-early-icon">🎉</span>
+            <span>
+              We're just getting started — <strong>be among the first</strong> to list your space or subscribe to a kitchen in your area.
+            </span>
           </div>
         </div>
 
@@ -123,7 +101,7 @@ export default function Home() {
             <span className="hm-fc-icon">🍛</span>
             <div>
               <div className="hm-fc-title">Dal Tadka + Roti</div>
-              <div className="hm-fc-sub">Lunch · Khan Mess</div>
+              <div className="hm-fc-sub">Lunch · Home Kitchen</div>
             </div>
             <span className="hm-fc-badge">Serving Now</span>
           </div>
@@ -137,8 +115,8 @@ export default function Home() {
           <div className="hm-float-card hm-float-card--3">
             <span className="hm-fc-icon">✅</span>
             <div>
-              <div className="hm-fc-title">Rent Paid</div>
-              <div className="hm-fc-sub">June 2025 · On time</div>
+              <div className="hm-fc-title">Meal Paused</div>
+              <div className="hm-fc-sub">Extended automatically</div>
             </div>
           </div>
         </div>
@@ -151,8 +129,8 @@ export default function Home() {
 
         <div className="hm-steps">
           {[
-            { n: "01", title: "Create your account", desc: "Sign up as a renter, room provider, or kitchen owner. Takes under 2 minutes." },
-            { n: "02", title: "Browse & connect",    desc: "Find rooms and kitchens near you. Chat directly with owners — no intermediary." },
+            { n: "01", title: "Create your account", desc: "Sign up as a student, room provider, or kitchen owner. Takes under 2 minutes." },
+            { n: "02", title: "Browse & connect",    desc: "Find rooms and kitchens near your college. Chat directly with owners — no middleman." },
             { n: "03", title: "Move in & eat well",  desc: "Book your room, subscribe to a meal plan, and manage everything from your dashboard." },
           ].map((s, i) => (
             <div key={i} className="hm-step">
@@ -186,47 +164,39 @@ export default function Home() {
         <div className="hm-split-card hm-split-card--rooms">
           <div className="hm-split-icon">🏠</div>
           <h3>Looking for a Room?</h3>
-          <p>Browse verified PGs, flats, and shared spaces. Filter by gender preference, amenities, and budget.</p>
+          <p>Browse PGs, flats, and shared spaces near ITER and other Bhubaneswar colleges. Filter by budget and amenities.</p>
           <Link to="/rooms" className="hm-split-btn">Explore Rooms →</Link>
         </div>
         <div className="hm-split-divider">or</div>
         <div className="hm-split-card hm-split-card--kitchens">
           <div className="hm-split-icon">🍽</div>
           <h3>Need Home-cooked Meals?</h3>
-          <p>Subscribe to local home kitchens. Get breakfast, lunch or dinner delivered daily. Pause anytime.</p>
+          <p>Subscribe to local home kitchens near your college. Get breakfast, lunch or dinner daily. Pause anytime.</p>
           <Link to="/kitchens" className="hm-split-btn">Find Kitchens →</Link>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="hm-testimonials reveal">
-        <div className="hm-section-tag">Testimonials</div>
-        <h2 className="hm-section-title">Loved by renters & owners</h2>
-
-        <div className="hm-testimonial-wrap">
-          {TESTIMONIALS.map((t, i) => (
-            <div
-              key={i}
-              className={`hm-testimonial ${activeTestimonial === i ? "active" : ""}`}
-            >
-              <p className="hm-testimonial-text">"{t.text}"</p>
-              <div className="hm-testimonial-author">
-                <div className="hm-testimonial-avatar">{t.avatar}</div>
-                <div>
-                  <div className="hm-testimonial-name">{t.name}</div>
-                  <div className="hm-testimonial-role">{t.role}</div>
-                </div>
-              </div>
+      {/* ── EARLY ADOPTER SECTION ── */}
+      <section className="hm-early reveal">
+        <div className="hm-early-inner">
+          <div className="hm-section-tag">Why join now?</div>
+          <h2 className="hm-section-title">Be part of something being built</h2>
+          <div className="hm-early-grid">
+            <div className="hm-early-card">
+              <div className="hm-early-card-icon">🏆</div>
+              <h3>First mover advantage</h3>
+              <p>Kitchen owners and room providers who list early get maximum visibility when students start joining.</p>
             </div>
-          ))}
-          <div className="hm-testimonial-dots">
-            {TESTIMONIALS.map((_, i) => (
-              <button
-                key={i}
-                className={`hm-tdot ${activeTestimonial === i ? "active" : ""}`}
-                onClick={() => setActiveTestimonial(i)}
-              />
-            ))}
+            <div className="hm-early-card">
+              <div className="hm-early-card-icon">💬</div>
+              <h3>Shape the product</h3>
+              <p>Early users directly influence what we build next. Your feedback matters — we're listening.</p>
+            </div>
+            <div className="hm-early-card">
+              <div className="hm-early-card-icon">🆓</div>
+              <h3>Free to list, free to join</h3>
+              <p>No listing fees, no hidden charges. We're focused on building trust and growing together first.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -238,7 +208,9 @@ export default function Home() {
             <div className="hm-cta-blob" />
             <div className="hm-section-tag hm-section-tag--light">Get started today</div>
             <h2 className="hm-cta-title">Your perfect space is one click away</h2>
-            <p className="hm-cta-sub">Join thousands of users already finding rooms and meals on our platform.</p>
+            <p className="hm-cta-sub">
+              MeZzDiNe is launching around ITER and Bhubaneswar colleges — join early and help us grow.
+            </p>
             <div className="hm-cta-btns">
               <Link to="/register" className="hm-btn hm-btn--white">
                 Create Free Account →

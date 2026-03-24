@@ -186,13 +186,14 @@ export const subscribeKitchen = asyncHandler(async (req, res) => {
 
     const user = await User.findById(req.user.id).select("name phone");
 
-  await Notification.create({
+  const notif = await Notification.create({
     recipientId: kitchen.ownerId._id,
     type:        "subscription",
     title:       "🎉 New Subscriber!",
-     message:     `${user.name} (ph- ${user.phone || "N/A"}) subscribed to ${kitchen.kitchenName} (${mealLabel}).`,
+    message:     `${user.name} (ph- ${user.phone || "N/A"}) subscribed to ${kitchen.kitchenName} (${mealLabel}).`,
     kitchenId,
   });
+global.io?.to(String(kitchen.ownerId._id)).emit("newNotification", notif.toObject());
 
   res.status(201).json({ success: true, data: subscription });
 });
@@ -238,7 +239,7 @@ export const unsubscribeKitchen = asyncHandler(async (req, res) => {
 
   // ── Notify owner ───────────────────────────────────────────────────────
   try {
-    await Notification.create({
+    const notif = await Notification.create({
       recipientId: ownerRecipientId,
       type:        "unsubscription",
       title:       "👋 Subscriber Left",
@@ -248,14 +249,9 @@ export const unsubscribeKitchen = asyncHandler(async (req, res) => {
                       ? `Estimated refund: ₹${refundEst}. Contact them if you wish to settle.`
                       : "No refund amount outstanding."),
       kitchenId,
-      meta: {
-        subscriberName,
-        mealPlan:  subscription.mealPlan,
-        daysLeft,
-        mealsLeft,
-        refundEst,
-      },
+      meta: { subscriberName, mealPlan: subscription.mealPlan, daysLeft, mealsLeft, refundEst },
     });
+global.io?.to(String(ownerRecipientId)).emit("newNotification", notif.toObject());
   } catch (notifErr) {
     console.error("[unsubscribe] Notification create failed:", notifErr.message);
   }
