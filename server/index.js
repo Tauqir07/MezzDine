@@ -33,9 +33,8 @@ import contactRoutes from "./routes/ContactRoutes.js";
 import PushRoutes from "./routes/PushRoutes.js";
 
 const app = express();
-
 app.use(cors({
-  origin:"https://mezzdineapp.vercel.app",
+  origin: ["https://mezzdineapp.vercel.app", "capacitor://localhost", "http://localhost"],
   credentials: true
 }));
 
@@ -155,6 +154,9 @@ const io     = new Server(server, {
 });
 
 global.io = io;
+global.emitNotification = (recipientId, notification) => {
+  io.to(String(recipientId)).emit("newNotification", notification);
+};
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);

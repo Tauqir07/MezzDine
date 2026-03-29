@@ -1,10 +1,9 @@
 const errorHandler = (err, req, res, next) => {
-  console.log("🔥🔥🔥 RAW ERROR OBJECT 🔥🔥🔥");
-  console.log(err);
-  console.log("🔥🔥🔥 STACK 🔥🔥🔥");
-  console.log(err.stack);
+  console.error("🔥 ERROR STACK:", err);
 
-  res.status(500).json({
+  const statusCode = err.statusCode || 500;
+
+  res.status(statusCode).json({
     success: false,
     message: err.message || "Internal Server Error"
   });

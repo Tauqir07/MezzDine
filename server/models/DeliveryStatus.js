@@ -42,4 +42,4 @@ const deliveryStatusSchema = new mongoose.Schema(
 // one doc per kitchen per day
 deliveryStatusSchema.index({ kitchenId: 1, date: 1 }, { unique: true });
 
-export default mongoose.model("Deliverystatus", deliveryStatusSchema);
+export default mongoose.model("DeliveryStatus", deliveryStatusSchema);

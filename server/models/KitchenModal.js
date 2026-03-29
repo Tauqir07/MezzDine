@@ -60,6 +60,9 @@ oneMealPrice:Number,
 twoMealPrice:Number,
 
 threeMealPrice:Number,
+breakfastPrice: { type: Number, default: 0 },  // breakfast-only plan price/month
+lunchPrice:     { type: Number, default: 0 },  // lunch-only plan price/month
+dinnerPrice:    { type: Number, default: 0 }, 
 upiId: { type: String, default: "" },
 images:[
 {
