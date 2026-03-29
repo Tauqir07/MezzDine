@@ -32,6 +32,8 @@ import reportRoutes from "./routes/ReportRoutes.js";
 import contactRoutes from "./routes/ContactRoutes.js";
 import PushRoutes from "./routes/PushRoutes.js";
 
+const app = express(); 
+
 app.use(cors({
   origin: ["https://mezzdineapp.vercel.app", "capacitor://localhost", "http://localhost", "https://localhost"],
   credentials: true
