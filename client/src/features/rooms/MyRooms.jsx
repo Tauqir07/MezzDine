@@ -83,6 +83,9 @@ export default function MyRooms() {
                 >
                   Edit
                 </button>
+                <button onClick={() => navigate(`/rooms/dashboard/${room._id}`)}>
+  📊 Dashboard
+</button>
 
 
                 {/* DELETE BUTTON */}

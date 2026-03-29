@@ -12,6 +12,7 @@ server/node_modules/
 client/node_modules/
 # Env files
 .env
+.ENV
 .env.*
 server/.env
 client/.env
@@ -38,3 +39,5 @@ server/uploads/
 *.njsproj
 *.sln
 *.sw?
+.env
+android/

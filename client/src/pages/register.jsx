@@ -327,7 +327,6 @@ function Register() {
                 </button>
               </p>
             </>
-
           )}
 
         </div>
