@@ -168,13 +168,17 @@ export const subscribeKitchen = asyncHandler(async (req, res) => {
   const exists = await Subscription.findOne({ userId: req.user.id, kitchenId });
   if (exists) return res.status(409).json({ success: false, message: "Already subscribed" });
 
-  const subscription = await Subscription.create({
+  const startDate = new Date();
+const endDate = new Date(startDate);
+endDate.setMonth(endDate.getMonth() + 1);
+
+const subscription = await Subscription.create({
     userId:        req.user.id,
     kitchenId,
     mealPlan,
     preferredMeal: mealPlan === "one" ? preferredMeal : null,
-    startDate:     new Date(),
-    endDate:       new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    startDate,
+    endDate,
   });
 
   kitchen.currentSubscribers += 1;
