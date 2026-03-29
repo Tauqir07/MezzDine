@@ -32,9 +32,8 @@ import reportRoutes from "./routes/ReportRoutes.js";
 import contactRoutes from "./routes/ContactRoutes.js";
 import PushRoutes from "./routes/PushRoutes.js";
 
-const app = express();
 app.use(cors({
-  origin: ["https://mezzdineapp.vercel.app", "capacitor://localhost", "http://localhost"],
+  origin: ["https://mezzdineapp.vercel.app", "capacitor://localhost", "http://localhost", "https://localhost"],
   credentials: true
 }));
 
@@ -149,8 +148,11 @@ cron.schedule("0 0 1 * *", async () => {
 // ── Socket.io ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5001;
 const server = http.createServer(app);
-const io     = new Server(server, {
-  cors: { origin: "https://mezzdineapp.vercel.app", credentials: true }
+const io = new Server(server, {
+  cors: { 
+    origin: ["https://mezzdineapp.vercel.app", "capacitor://localhost", "http://localhost", "https://localhost"], 
+    credentials: true 
+  }
 });
 
 global.io = io;
