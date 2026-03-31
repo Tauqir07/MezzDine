@@ -8,6 +8,8 @@ import PageLoader from "../../components/PageLoader";
 import Kitchenmap from "../../map/Kitchenmap";
 import PaymentModal from "../../components/PaymentModals/PaymentModal";
 
+const MEZZDINE_URL = "https://mezzdine.com"; // ← replace with actual URL when ready
+
 export default function KitchenDetails() {
 
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ export default function KitchenDetails() {
   const [mealPlan,      setMealPlan]      = useState("one");
   const [preferredMeal, setPreferredMeal] = useState("dinner");
   const [isSubscribed, setIsSubscribed]   = useState(false);
-  const [isPending,     setIsPending]     = useState(false); // ← NEW: payment submitted, awaiting approval
+  const [isPending,     setIsPending]     = useState(false);
   const [errorMsg, setErrorMsg]           = useState("");
   const [dayIndex, setDayIndex]           = useState(0);
   const [subCount, setSubCount]           = useState(0);
@@ -47,6 +49,19 @@ export default function KitchenDetails() {
   const myId    = user?._id ?? user?.id;
   const isOwner = !!(myId && ownerId && String(myId) === String(ownerId));
   const myReview = reviews.find(r => r.user?._id === (user?._id ?? user?.id));
+
+  // ── WhatsApp link builder ─────────────────────────────────────────────────
+  function getWhatsAppLink() {
+    const phone = kitchen?.ownerId?.phone;
+    if (!phone) return null;
+
+    // Normalize to E.164 — strip non-digits, prepend India code if 10 digits
+    const digits = phone.replace(/\D/g, "");
+    const e164   = digits.length === 10 ? `91${digits}` : digits;
+
+    const message = `Hi ${kitchen.kitchenName}! I found you on MeZzDiNe ${MEZZDINE_URL}. I'd like to know more.`;
+    return `https://wa.me/${e164}?text=${encodeURIComponent(message)}`;
+  }
 
   /* ── FETCH KITCHEN ── */
   useEffect(() => {
@@ -82,7 +97,6 @@ export default function KitchenDetails() {
   useEffect(() => {
     if (!user) return;
 
-    // Check active subscription
     api.get("/subscriptions/my")
       .then(res => {
         const data = res.data.data;
@@ -96,8 +110,7 @@ export default function KitchenDetails() {
       })
       .catch(() => setIsSubscribed(false));
 
-    // ← NEW: Check if user has a pending/submitted advance payment for this kitchen
-   api.get(`/payments/my/${id}`)
+    api.get(`/payments/my/${id}`)
       .then(res => {
         const payments = res.data.data || [];
         const pendingAdvance = payments.find(
@@ -123,7 +136,7 @@ export default function KitchenDetails() {
     return () => clearInterval(t);
   }, [days.length]);
 
-  /* ── CONTACT OWNER ── */
+  /* ── CONTACT OWNER (in-app chat) ── */
   async function contactOwner() {
     try {
       if (!kitchen?.ownerId) return;
@@ -146,7 +159,6 @@ export default function KitchenDetails() {
   }
 
   /* ── SUBSCRIBE ── */
-  // Step 1: open payment modal
   function openAdvanceModal(plan) {
     const priceMap = {
       one:       kitchen.oneMealPrice,
@@ -167,10 +179,9 @@ export default function KitchenDetails() {
     setShowPayment(true);
   }
 
-  // ← CHANGED: Step 2 — after UTR submitted, just show pending state (no auto-subscribe)
   async function onAdvancePaid() {
     setShowPayment(false);
-    setIsPending(true); // show "pending approval" UI
+    setIsPending(true);
   }
 
   /* ── UNSUBSCRIBE ── */
@@ -220,7 +231,7 @@ export default function KitchenDetails() {
     setIsEditing(false);
   }
 
-  // ── Fetch subscription end date ──
+  /* ── FETCH SUBSCRIPTION END DATE ── */
   useEffect(() => {
     if (!user || !isSubscribed) return;
     api.get("/subscriptions/my")
@@ -237,6 +248,8 @@ export default function KitchenDetails() {
   }, [id, user, isSubscribed]);
 
   if (!kitchen) return <PageLoader />;
+
+  const whatsappLink = getWhatsAppLink();
 
   return (
     <div className="kd-page">
@@ -505,7 +518,6 @@ export default function KitchenDetails() {
                     <div className="kd-subscribed-badge">✓ You are subscribed</div>
                   )}
 
-                  {/* ← NEW: Pending approval banner */}
                   {!isSubscribed && isPending && (
                     <div className="kd-pending-badge">
                       ⏳ Payment submitted — awaiting owner approval
@@ -514,9 +526,25 @@ export default function KitchenDetails() {
 
                   {errorMsg && <div className="kd-error-msg">{errorMsg}</div>}
 
-                  <button className="kd-contact-btn" onClick={contactOwner}>
-                    Contact Owner
-                  </button>
+                  {/* ── Contact row: WhatsApp (primary) + Chat (secondary) ── */}
+                  <div className="kd-contact-row">
+                    {whatsappLink && (
+                      <a
+                        href={whatsappLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="kd-whatsapp-btn"
+                      >
+                        <svg className="kd-whatsapp-icon" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                        WhatsApp Owner
+                      </a>
+                    )}
+                    <button className="kd-chat-btn" onClick={contactOwner}>
+                      💬 Chat
+                    </button>
+                  </div>
 
                   {/* Meal plan selector — only before subscribing and not pending */}
                   {!isSubscribed && !isPending && (
@@ -575,7 +603,6 @@ export default function KitchenDetails() {
                         </button>
                       </>
                     ) : isPending ? (
-                      // ← NEW: pending state — no subscribe button, just info
                       <p className="kd-pending-note">
                         Your payment is under review. You'll be subscribed once the owner approves it.
                       </p>

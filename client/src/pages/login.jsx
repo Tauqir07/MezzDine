@@ -14,14 +14,16 @@ function Login() {
   const navigate    = useNavigate();
   const { setUser } = useAuth();
 
-  // ── Forgot password state (added) ──────────────────────────────────────────
-  const [step, setStep]                   = useState("login"); // "login" | "forgot" | "otp" | "reset"
-  const [fpEmail, setFpEmail]             = useState("");
-  const [otpToken, setOtpToken]           = useState("");
-  const [otp, setOtp]                     = useState(["", "", "", "", "", ""]); 
-  const [newPassword, setNewPassword]     = useState("");
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [resending, setResending]         = useState(false);
+  // ── Forgot password state (commented out — uncomment when ready) ───────────
+  // const [step, setStep]                       = useState("login"); // "login" | "forgot" | "otp" | "reset"
+  // const [fpEmail, setFpEmail]                 = useState("");
+  // const [otpToken, setOtpToken]               = useState("");
+  // const [otp, setOtp]                         = useState(["", "", "", "", "", ""]);
+  // const [newPassword, setNewPassword]         = useState("");
+  // const [showNewPassword, setShowNewPassword] = useState(false);
+  // const [resending, setResending]             = useState(false);
+
+  // ── Login ──────────────────────────────────────────────────────────────────
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,15 +32,11 @@ function Login() {
 
     try {
       const res = await api.post("/auth/login", { email, password });
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       const { token, user } = res.data.data;
 
       localStorage.setItem("token", token);
       setUser(user);
-
-      
 
       if (user.role === "roomProvider") {
         navigate("/rooms/my");
@@ -55,98 +53,98 @@ function Login() {
     }
   };
 
-  // ── Forgot password handlers (added) ───────────────────────────────────────
+  // ── Forgot password handlers (commented out — uncomment when ready) ────────
 
-  const handleForgotSend = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await api.post("/auth/forgot-password/send-otp", { email: fpEmail });
-      setOtpToken(res.data.otpToken);
-      setStep("otp");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleForgotSend = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   setLoading(true);
+  //   try {
+  //     const res = await api.post("/auth/forgot-password/send-otp", { email: fpEmail });
+  //     setOtpToken(res.data.otpToken);
+  //     setStep("otp");
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    const otpValue = otp.join("");
-    if (otpValue.length < 6) { setError("Please enter the full 6-digit code"); return; }
-    setError("");
-    setLoading(true);
-    try {
-      const res = await api.post("/auth/forgot-password/verify-otp", {
-        email: fpEmail, otp: otpValue, otpToken,
-      });
-      setOtpToken(res.data.otpToken);
-      setStep("reset");
-    } catch (err) {
-      setError(err.response?.data?.message || "Invalid OTP. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleVerifyOtp = async (e) => {
+  //   e.preventDefault();
+  //   const otpValue = otp.join("");
+  //   if (otpValue.length < 6) { setError("Please enter the full 6-digit code"); return; }
+  //   setError("");
+  //   setLoading(true);
+  //   try {
+  //     const res = await api.post("/auth/forgot-password/verify-otp", {
+  //       email: fpEmail, otp: otpValue, otpToken,
+  //     });
+  //     setOtpToken(res.data.otpToken);
+  //     setStep("reset");
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Invalid OTP. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleResetPassword = async (e) => {
-    e.preventDefault();
-    if (newPassword.length < 6) { setError("Password must be at least 6 characters"); return; }
-    setError("");
-    setLoading(true);
-    try {
-      await api.post("/auth/forgot-password/reset", {
-        email: fpEmail, otpToken, password: newPassword,
-      });
-      setStep("login");
-      setFpEmail(""); setOtp(["","","","","",""]); setNewPassword(""); setOtpToken("");
-      alert("Password reset successful! Please sign in.");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to reset password.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleResetPassword = async (e) => {
+  //   e.preventDefault();
+  //   if (newPassword.length < 6) { setError("Password must be at least 6 characters"); return; }
+  //   setError("");
+  //   setLoading(true);
+  //   try {
+  //     await api.post("/auth/forgot-password/reset", {
+  //       email: fpEmail, otpToken, password: newPassword,
+  //     });
+  //     setStep("login");
+  //     setFpEmail(""); setOtp(["","","","","",""]); setNewPassword(""); setOtpToken("");
+  //     alert("Password reset successful! Please sign in.");
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Failed to reset password.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleResend = async () => {
-    setResending(true); setError("");
-    try {
-      const res = await api.post("/auth/forgot-password/send-otp", { email: fpEmail });
-      setOtpToken(res.data.otpToken);
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not resend OTP.");
-    } finally {
-      setResending(false);
-    }
-  };
+  // const handleResend = async () => {
+  //   setResending(true); setError("");
+  //   try {
+  //     const res = await api.post("/auth/forgot-password/send-otp", { email: fpEmail });
+  //     setOtpToken(res.data.otpToken);
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Could not resend OTP.");
+  //   } finally {
+  //     setResending(false);
+  //   }
+  // };
 
-  const handleOtpChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return;
-    const next = [...otp]; next[index] = value.slice(-1); setOtp(next);
-    if (value && index < 5) document.getElementById(`fp-otp-${index + 1}`)?.focus();
-  };
+  // const handleOtpChange = (index, value) => {
+  //   if (!/^\d*$/.test(value)) return;
+  //   const next = [...otp]; next[index] = value.slice(-1); setOtp(next);
+  //   if (value && index < 5) document.getElementById(`fp-otp-${index + 1}`)?.focus();
+  // };
 
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0)
-      document.getElementById(`fp-otp-${index - 1}`)?.focus();
-  };
+  // const handleOtpKeyDown = (index, e) => {
+  //   if (e.key === "Backspace" && !otp[index] && index > 0)
+  //     document.getElementById(`fp-otp-${index - 1}`)?.focus();
+  // };
 
-  const handleOtpPaste = (e) => {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted.length === 6) { setOtp(pasted.split("")); document.getElementById("fp-otp-5")?.focus(); }
-    e.preventDefault();
-  };
+  // const handleOtpPaste = (e) => {
+  //   const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+  //   if (pasted.length === 6) { setOtp(pasted.split("")); document.getElementById("fp-otp-5")?.focus(); }
+  //   e.preventDefault();
+  // };
 
-  const goBack = (toStep) => { setStep(toStep); setError(""); };
+  // const goBack = (toStep) => { setStep(toStep); setError(""); };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="login-wrapper">
 
-      {/* Left panel — decorative (unchanged) */}
+      {/* Left panel */}
       <div className="login-panel">
         <div className="login-panel__inner">
           <div className="login-panel__logo">🏠</div>
@@ -164,80 +162,79 @@ function Login() {
       <div className="login-form-side">
         <div className="login-card">
 
-          {/* ── STEP: login (original, unchanged) ── */}
-          {step === "login" && (
-            <>
-              <div className="login-card__header">
-                <h2 className="login-card__title">Welcome back</h2>
-                <p className="login-card__sub">Sign in to your account to continue.</p>
+          {/* ── STEP: login ── */}
+          <>
+            <div className="login-card__header">
+              <h2 className="login-card__title">Welcome back</h2>
+              <p className="login-card__sub">Sign in to your account to continue.</p>
+            </div>
+
+            {error && (
+              <div className="login-error">
+                <span>⚠</span> {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="login-form">
+
+              <div className="login-field">
+                <label htmlFor="login-email">Email address</label>
+                <input
+                  id="login-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
               </div>
 
-              {error && (
-                <div className="login-error">
-                  <span>⚠</span> {error}
+              <div className="login-field">
+                <div className="login-field__row">
+                  <label htmlFor="login-password">Password</label>
+                  {/* Forgot password link (commented out — uncomment when ready) */}
+                  {/* <button
+                    type="button"
+                    className="login-forgot-link"
+                    onClick={() => { goBack("forgot"); setFpEmail(email); }}
+                  >
+                    Forgot password?
+                  </button> */}
                 </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="login-form">
-
-                <div className="login-field">
-                  <label htmlFor="login-email">Email address</label>
+                <div className="login-password-wrap">
                   <input
-                    id="login-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    id="login-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
                     required
                   />
+                  <button
+                    type="button"
+                    className="login-eye-btn"
+                    onClick={() => setShowPassword(v => !v)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? "🙈" : "👁"}
+                  </button>
                 </div>
+              </div>
 
-                <div className="login-field">
-                  {/* label row with forgot password link */}
-                  <div className="login-field__row">
-                    <label htmlFor="login-password">Password</label>
-                    <button
-                      type="button"
-                      className="login-forgot-link"
-                      onClick={() => { goBack("forgot"); setFpEmail(email); }}
-                    >
-                      Forgot password?
-                    </button>
-                  </div>
-                  <div className="login-password-wrap">
-                    <input
-                      id="login-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="login-eye-btn"
-                      onClick={() => setShowPassword(v => !v)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? "🙈" : "👁"}
-                    </button>
-                  </div>
-                </div>
+              <button type="submit" className={`login-btn${loading ? " login-btn--loading" : ""}`} disabled={loading}>
+                {loading ? <span className="login-btn__spinner" /> : "Sign in"}
+              </button>
 
-                <button type="submit" className={`login-btn${loading ? " login-btn--loading" : ""}`} disabled={loading}>
-                  {loading ? <span className="login-btn__spinner" /> : "Sign in"}
-                </button>
+            </form>
 
-              </form>
+            <p className="login-register-link">
+              Don't have an account? <a href="/register">Create one</a>
+            </p>
+          </>
 
-              <p className="login-register-link">
-                Don't have an account? <a href="/register">Create one</a>
-              </p>
-            </>
-          )}
+          {/* ── Forgot password steps (commented out — uncomment when ready) ── */}
 
-          {/* ── STEP: forgot — enter email ── */}
-          {step === "forgot" && (
+          {/* {step === "forgot" && (
             <>
               <button className="login-back-btn" onClick={() => goBack("login")}>← Back</button>
               <div className="login-card__header">
@@ -262,10 +259,9 @@ function Login() {
                 </button>
               </form>
             </>
-          )}
+          )} */}
 
-          {/* ── STEP: otp — verify code ── */}
-          {step === "otp" && (
+          {/* {step === "otp" && (
             <>
               <button className="login-back-btn" onClick={() => goBack("forgot")}>← Back</button>
               <div className="login-card__header">
@@ -303,10 +299,9 @@ function Login() {
                 </button>
               </p>
             </>
-          )}
+          )} */}
 
-          {/* ── STEP: reset — new password ── */}
-          {step === "reset" && (
+          {/* {step === "reset" && (
             <>
               <div className="login-card__header">
                 <h2 className="login-card__title">New password</h2>
@@ -340,7 +335,7 @@ function Login() {
                 </button>
               </form>
             </>
-          )}
+          )} */}
 
         </div>
       </div>

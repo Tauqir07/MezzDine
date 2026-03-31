@@ -9,30 +9,29 @@ function Register() {
   // form fields
   const [name,     setName]     = useState("");
   const [email,    setEmail]    = useState("");
-  const [phone,    setPhone]    = useState("");   // ← ADDED
+  const [phone,    setPhone]    = useState("");
   const [password, setPassword] = useState("");
   const [role,     setRole]     = useState("");
 
   // password visibility
   const [showPassword, setShowPassword] = useState(false);
 
-  // OTP flow
-  const [step,     setStep]     = useState("form"); // "form" | "otp"
-  const [otp,      setOtp]      = useState(["", "", "", "", "", ""]);
-  const [otpToken, setOtpToken] = useState("");
-
   // ui
-  const [error,     setError]     = useState("");
-  const [loading,   setLoading]   = useState(false);
-  const [resending, setResending] = useState(false);
+  const [error,   setError]   = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // ── Step 1: submit form → request OTP via email ────────────────────────────
+  // OTP flow state (commented out — uncomment when ready)
+  // const [step,     setStep]     = useState("form"); // "form" | "otp"
+  // const [otp,      setOtp]      = useState(["", "", "", "", "", ""]);
+  // const [otpToken, setOtpToken] = useState("");
+  // const [resending, setResending] = useState(false);
+
+  // ── Submit form → register directly ───────────────────────────────────────
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // client-side phone check before hitting the server
     if (!/^\d{10}$/.test(phone.trim())) {
       setError("Enter a valid 10-digit phone number");
       return;
@@ -40,38 +39,12 @@ function Register() {
 
     setLoading(true);
     try {
-      const res = await api.post("/auth/register/send-otp", {
+      const res = await api.post("/auth/register", {
         name,
         email,
-        phone: phone.trim(),   // ← ADDED
+        phone: phone.trim(),
         password,
         role,
-      });
-
-      setOtpToken(res.data.otpToken);
-      setStep("otp");
-
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ── Step 2: verify OTP → complete registration ─────────────────────────────
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    const otpValue = otp.join("");
-    if (otpValue.length < 6) { setError("Please enter the full 6-digit code"); return; }
-    setError("");
-    setLoading(true);
-
-    try {
-      const res = await api.post("/auth/register/verify-otp", {
-        email,
-        otp: otpValue,
-        otpToken,
       });
 
       if (res.data.success) {
@@ -79,53 +52,88 @@ function Register() {
       }
 
     } catch (err) {
-      setError(err.response?.data?.message || "Invalid OTP. Please try again.");
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── Resend OTP ─────────────────────────────────────────────────────────────
+  // ── OTP flow handlers (commented out — uncomment when ready) ───────────────
 
-  const handleResend = async () => {
-    setResending(true);
-    setError("");
-    try {
-      const res = await api.post("/auth/register/resend-otp", { otpToken });
-      setOtpToken(res.data.otpToken);
-    } catch (err) {
-      setError(err.response?.data?.message || "Could not resend OTP. Please try again.");
-    } finally {
-      setResending(false);
-    }
-  };
+  // const handleSubmitSendOtp = async (e) => {
+  //   e.preventDefault();
+  //   setError("");
+  //   if (!/^\d{10}$/.test(phone.trim())) {
+  //     setError("Enter a valid 10-digit phone number");
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   try {
+  //     const res = await api.post("/auth/register/send-otp", {
+  //       name, email, phone: phone.trim(), password, role,
+  //     });
+  //     setOtpToken(res.data.otpToken);
+  //     setStep("otp");
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  // ── OTP input helpers ──────────────────────────────────────────────────────
+  // const handleVerifyOtp = async (e) => {
+  //   e.preventDefault();
+  //   const otpValue = otp.join("");
+  //   if (otpValue.length < 6) { setError("Please enter the full 6-digit code"); return; }
+  //   setError("");
+  //   setLoading(true);
+  //   try {
+  //     const res = await api.post("/auth/register/verify-otp", {
+  //       email, otp: otpValue, otpToken,
+  //     });
+  //     if (res.data.success) navigate("/login");
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Invalid OTP. Please try again.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
-  const handleOtpChange = (index, value) => {
-    if (!/^\d*$/.test(value)) return;
-    const next = [...otp];
-    next[index] = value.slice(-1);
-    setOtp(next);
-    if (value && index < 5) {
-      document.getElementById(`otp-${index + 1}`)?.focus();
-    }
-  };
+  // const handleResend = async () => {
+  //   setResending(true);
+  //   setError("");
+  //   try {
+  //     const res = await api.post("/auth/register/resend-otp", { otpToken });
+  //     setOtpToken(res.data.otpToken);
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Could not resend OTP. Please try again.");
+  //   } finally {
+  //     setResending(false);
+  //   }
+  // };
 
-  const handleOtpKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      document.getElementById(`otp-${index - 1}`)?.focus();
-    }
-  };
+  // const handleOtpChange = (index, value) => {
+  //   if (!/^\d*$/.test(value)) return;
+  //   const next = [...otp];
+  //   next[index] = value.slice(-1);
+  //   setOtp(next);
+  //   if (value && index < 5) document.getElementById(`otp-${index + 1}`)?.focus();
+  // };
 
-  const handleOtpPaste = (e) => {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted.length === 6) {
-      setOtp(pasted.split(""));
-      document.getElementById("otp-5")?.focus();
-    }
-    e.preventDefault();
-  };
+  // const handleOtpKeyDown = (index, e) => {
+  //   if (e.key === "Backspace" && !otp[index] && index > 0) {
+  //     document.getElementById(`otp-${index - 1}`)?.focus();
+  //   }
+  // };
+
+  // const handleOtpPaste = (e) => {
+  //   const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+  //   if (pasted.length === 6) {
+  //     setOtp(pasted.split(""));
+  //     document.getElementById("otp-5")?.focus();
+  //   }
+  //   e.preventDefault();
+  // };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -143,7 +151,7 @@ function Register() {
           <ul className="rg-panel__perks">
             <li><span>✓</span> Browse verified listings</li>
             <li><span>✓</span> List your space in minutes</li>
-            <li><span>✓</span> Secure OTP-verified accounts</li>
+            <li><span>✓</span> Secure accounts</li>
           </ul>
         </div>
       </div>
@@ -152,111 +160,106 @@ function Register() {
       <div className="rg-form-side">
         <div className="rg-card">
 
-          {step === "form" ? (
+          {/* ── Registration form ── */}
+          <div className="rg-card__header">
+            <h2 className="rg-card__title">Create account</h2>
+            <p className="rg-card__sub">Fill in your details to get started.</p>
+          </div>
 
-            /* ── Registration form ── */
-            <>
-              <div className="rg-card__header">
-                <h2 className="rg-card__title">Create account</h2>
-                <p className="rg-card__sub">We'll send a verification code to your email.</p>
-              </div>
+          {error && <div className="rg-error"><span>⚠</span> {error}</div>}
 
-              {error && <div className="rg-error"><span>⚠</span> {error}</div>}
+          <form onSubmit={handleSubmit} className="rg-form">
 
-              <form onSubmit={handleSubmit} className="rg-form">
+            <div className="rg-field">
+              <label htmlFor="rg-name">Full Name</label>
+              <input
+                id="rg-name"
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                required
+              />
+            </div>
 
-                <div className="rg-field">
-                  <label htmlFor="rg-name">Full Name</label>
-                  <input
-                    id="rg-name"
-                    type="text"
-                    placeholder="John Doe"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    required
-                  />
-                </div>
+            <div className="rg-field">
+              <label htmlFor="rg-email">Email address</label>
+              <input
+                id="rg-email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+              />
+            </div>
 
-                <div className="rg-field">
-                  <label htmlFor="rg-email">Email address</label>
-                  <input
-                    id="rg-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
+            <div className="rg-field">
+              <label htmlFor="rg-phone">Phone number</label>
+              <input
+                id="rg-phone"
+                type="tel"
+                placeholder="10-digit mobile number"
+                value={phone}
+                onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                required
+              />
+            </div>
 
-                <div className="rg-field">
-                  <label htmlFor="rg-phone">Phone number</label>   {/* ← ADDED */}
-                  <input
-                    id="rg-phone"
-                    type="tel"
-                    placeholder="10-digit mobile number"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    required
-                  />
-                </div>
-
-                <div className="rg-field">
-                  <label htmlFor="rg-password">Password</label>
-                  <div className="rg-password-wrap">
-                    <input
-                      id="rg-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="rg-eye-btn"
-                      onClick={() => setShowPassword(v => !v)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                    >
-                      {showPassword ? "🙈" : "👁"}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="rg-field">
-                  <label htmlFor="rg-role">I am a…</label>
-                  <select
-                    id="rg-role"
-                    value={role}
-                    onChange={e => setRole(e.target.value)}
-                    required
-                    className={role ? "rg-select--filled" : ""}
-                  >
-                    <option value="">Select role</option>
-                    <option value="user">Normal User</option>
-                    <option value="roomProvider">Room Provider</option>
-                    <option value="kitchenOwner">Kitchen Owner</option>
-                  </select>
-                </div>
-
+            <div className="rg-field">
+              <label htmlFor="rg-password">Password</label>
+              <div className="rg-password-wrap">
+                <input
+                  id="rg-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
                 <button
-                  type="submit"
-                  className={`rg-btn${loading ? " rg-btn--loading" : ""}`}
-                  disabled={loading}
+                  type="button"
+                  className="rg-eye-btn"
+                  onClick={() => setShowPassword(v => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {loading ? <span className="rg-spinner" /> : "Send Verification Code"}
+                  {showPassword ? "🙈" : "👁"}
                 </button>
+              </div>
+            </div>
 
-              </form>
+            <div className="rg-field">
+              <label htmlFor="rg-role">I am a…</label>
+              <select
+                id="rg-role"
+                value={role}
+                onChange={e => setRole(e.target.value)}
+                required
+                className={role ? "rg-select--filled" : ""}
+              >
+                <option value="">Select role</option>
+                <option value="user">Normal User</option>
+                <option value="roomProvider">Room Provider</option>
+                <option value="kitchenOwner">Kitchen Owner</option>
+              </select>
+            </div>
 
-              <p className="rg-switch">
-                Already have an account? <Link to="/login">Sign in</Link>
-              </p>
-            </>
+            <button
+              type="submit"
+              className={`rg-btn${loading ? " rg-btn--loading" : ""}`}
+              disabled={loading}
+            >
+              {loading ? <span className="rg-spinner" /> : "Create Account"}
+            </button>
 
-          ) : (
+          </form>
 
-            /* ── OTP verification step ── */
+          <p className="rg-switch">
+            Already have an account? <Link to="/login">Sign in</Link>
+          </p>
+
+          {/* OTP verification step (commented out — uncomment when ready) */}
+          {/* {step === "otp" && (
             <>
               <button
                 className="rg-back-btn"
@@ -276,7 +279,6 @@ function Register() {
               {error && <div className="rg-error"><span>⚠</span> {error}</div>}
 
               <form onSubmit={handleVerifyOtp} className="rg-form">
-
                 <div className="rg-otp-row" onPaste={handleOtpPaste}>
                   {otp.map((digit, i) => (
                     <input
@@ -293,7 +295,6 @@ function Register() {
                     />
                   ))}
                 </div>
-
                 <button
                   type="submit"
                   className={`rg-btn${loading ? " rg-btn--loading" : ""}`}
@@ -301,33 +302,25 @@ function Register() {
                 >
                   {loading ? <span className="rg-spinner" /> : "Verify & Create Account"}
                 </button>
-
               </form>
 
               <p className="rg-resend">
                 Didn't receive it?{" "}
-                <button
-                  type="button"
-                  className="rg-resend-btn"
-                  onClick={handleResend}
-                  disabled={resending}
-                >
+                <button type="button" className="rg-resend-btn" onClick={handleResend} disabled={resending}>
                   {resending ? "Sending…" : "Resend code"}
                 </button>
               </p>
 
               <p className="rg-resend" style={{ marginTop: "8px" }}>
                 Wrong email?{" "}
-                <button
-                  type="button"
-                  className="rg-resend-btn"
+                <button type="button" className="rg-resend-btn"
                   onClick={() => { setStep("form"); setOtp(["","","","","",""]); setError(""); }}
                 >
                   Change it
                 </button>
               </p>
             </>
-          )}
+          )} */}
 
         </div>
       </div>
