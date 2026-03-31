@@ -59,7 +59,8 @@ export default function KitchenDetails() {
     const digits = phone.replace(/\D/g, "");
     const e164   = digits.length === 10 ? `91${digits}` : digits;
 
-    const message = `Hi ${kitchen.kitchenName}! I found you on MeZzDiNe ${MEZZDINE_URL}. I'd like to know more.`;
+   // ✅ Fixed
+const message = `Hi ${kitchen.kitchenName}! I found you on MeZzDiNe https://mezzdineapp.vercel.app/. I'd like to know more.`;
     return `https://wa.me/${e164}?text=${encodeURIComponent(message)}`;
   }
 
