@@ -79,13 +79,15 @@ export const myKitchen = asyncHandler(async (req, res) => {
   res.json({ success: true, data });
 });
 
+// ✅ Fixed
 export const getSingleKitchen = asyncHandler(async (req, res) => {
-  const kitchen = await Kitchen.findById(req.params.kitchenId).lean();
+  const kitchen = await Kitchen.findById(req.params.kitchenId)
+    .populate("ownerId", "name phone")   // ← add this
+    .lean();
   if (!kitchen) throw new AppError("Kitchen not found", 404);
   const liveCount = await Subscription.countDocuments({ kitchenId: kitchen._id });
   res.json({ success: true, data: { ...kitchen, currentSubscribers: liveCount } });
 });
-
 export const updateKitchen = asyncHandler(async (req, res) => {
 
   const kitchen = await Kitchen.findById(req.params.kitchenId);
