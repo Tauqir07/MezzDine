@@ -7,7 +7,7 @@ export default function useGPSLocation() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user || user.role !== "user") return;
+    if (!user) return;
     if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
