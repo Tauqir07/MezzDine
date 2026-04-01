@@ -18,28 +18,27 @@ export default function usePushNotifications(user) {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
 
     async function setup() {
-      try {
-        // 1. register service worker
-        const reg = await navigator.serviceWorker.register("/sw.js");
+  try {
+    const reg = await navigator.serviceWorker.register("/sw.js");
 
-        // 2. get VAPID public key from backend
-        const { data } = await api.get("/push/vapid-public-key");
-        const applicationServerKey = urlBase64ToUint8Array(data.publicKey);
+    const { data } = await api.get("/push/vapid-public-key");
+    const applicationServerKey = urlBase64ToUint8Array(data.publicKey);
 
-        // 3. subscribe (asks browser permission if not already granted)
-        const subscription = await reg.pushManager.subscribe({
-          userVisibleOnly:      true,
-          applicationServerKey,
-        });
+    // ← ADD THIS: force fresh subscription every time
+    const existing = await reg.pushManager.getSubscription();
+    if (existing) await existing.unsubscribe();
 
-        // 4. save subscription to backend
-        await api.post("/push/subscribe", { subscription });
+    const subscription = await reg.pushManager.subscribe({
+      userVisibleOnly:      true,
+      applicationServerKey,
+    });
 
-      } catch (err) {
-        // user denied permission or browser doesn't support — silently ignore
-        console.log("[Push] Setup skipped:", err.message);
-      }
-    }
+    await api.post("/push/subscribe", { subscription });
+
+  } catch (err) {
+    console.log("[Push] Setup skipped:", err.message);
+  }
+}
 
     setup();
   }, [user?._id]);

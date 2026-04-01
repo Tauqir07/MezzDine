@@ -1,5 +1,8 @@
 // public/sw.js — Service Worker
-// Place this file in your client/public/ folder
+
+self.addEventListener("install", e => self.skipWaiting());
+self.addEventListener("activate", e => e.waitUntil(clients.claim()));
+
 
 self.addEventListener("push", function (event) {
   if (!event.data) return;
