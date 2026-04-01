@@ -3,9 +3,10 @@ import api from "../api/axios";
 import { useAuth } from "../context/authContext";
 
 export default function useGPSLocation() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
+    if (loading) return;
     if (!user || user.role !== "user") return;
     if (!navigator.geolocation) return;
 
@@ -14,6 +15,7 @@ export default function useGPSLocation() {
         const { latitude: lat, longitude: lng } = pos.coords;
         try {
           await api.patch("/auth/location", { lat, lng });
+          console.log("[GPS] Location saved:", lat, lng);
         } catch {}
       },
       (err) => {
@@ -21,5 +23,5 @@ export default function useGPSLocation() {
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 5 * 60 * 1000 }
     );
-  }, [user?._id]);
+  }, [user?._id, loading]);
 }
