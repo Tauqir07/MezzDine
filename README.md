@@ -1,7 +1,8 @@
 A home kitchen subscription and room finder platform that connects home cooks with people looking for affordable, home-cooked daily meals and a roof above their head this project is designed solely for the coorporate employee and student who are in a need of these basic life necessaties 
-Kitchen Subscriptions
+
 
 FEATURES
+Kitchen Subscriptions
 Browse nearby home kitchens with photos, pricing, and weekly menus
 Choose from flexible meal plans — 1, 2, or 3 meals per day
 Pay advance directly via UPI with screenshot upload
