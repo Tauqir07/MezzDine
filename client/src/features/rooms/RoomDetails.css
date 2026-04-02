@@ -501,46 +501,48 @@
   .rd-similar-body { padding: 8px 10px; }
 }
 /* ── Contact row (same layout as kitchen) ── */
-.rd-contact-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-/* ── WhatsApp button ── */
-.rd-whatsapp-btn {
+/* ── Contact row: WhatsApp + Chat ── */
+.kd-contact-row {
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+/* WhatsApp button */
+.kd-whatsapp-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
   justify-content: center;
-  gap: 6px;
-  padding: 11px 14px;
-  background: #25D366;
+  padding: 11px 16px;
+  background: #25d366;
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   border-radius: 10px;
   text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
   border: none;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
 }
 
-.rd-whatsapp-btn:hover {
+.kd-whatsapp-btn:hover {
   background: #1ebe5d;
   transform: translateY(-1px);
 }
 
-/* Disabled WhatsApp */
-.rd-whatsapp-btn--disabled {
-  background: #cbd5e1;
-  cursor: not-allowed;
+.kd-whatsapp-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
-/* ── Chat button (same as kd-chat-btn) ── */
-.rd-contact-btn {
+/* Chat button */
+.kd-chat-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   padding: 11px 14px;
   background: transparent;
@@ -554,7 +556,7 @@
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 
-.rd-contact-btn:hover {
+.kd-chat-btn:hover {
   border-color: #94a3b8;
   color: #1e293b;
   background: #f8fafc;
