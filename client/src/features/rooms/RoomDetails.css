@@ -501,7 +501,7 @@
   .rd-similar-body { padding: 8px 10px; }
 }
 /* ── Contact row: WhatsApp + Chat ── */
-/* ── Contact row (MATCH KITCHEN STYLE) ── */
+/* ── Contact row ── */
 .rd-contact-row {
   display: flex;
   align-items: center;
@@ -509,18 +509,18 @@
   margin-bottom: 14px;
 }
 
-/* ── WhatsApp button (same vibe as kitchen CTA) ── */
+/* ── WhatsApp button (WIDER / PRIMARY) ── */
 .rd-whatsapp-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
 
-  flex: 1;
+  flex: 2; /* 👈 makes it wider */
 
   padding: 12px 14px;
 
-  background: #1a1a1a; /* same as your primary buttons */
+  background: #1a1a1a;
   color: #fff;
 
   font-size: 14px;
@@ -529,9 +529,7 @@
   border-radius: 12px;
   border: none;
 
-  text-decoration: none;
   cursor: pointer;
-
   transition: 0.2s ease;
 }
 
@@ -546,14 +544,16 @@
   height: 18px;
 }
 
-/* ── Chat button (secondary like kitchen buttons) ── */
+/* ── Chat button (SMALLER / SECONDARY) ── */
 .rd-chat-btn {
-  padding: 12px 14px;
+  flex: 1; /* 👈 makes it smaller */
+
+  padding: 12px 10px;
 
   background: #fff;
   color: #1a1a1a;
 
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 
   border: 1px solid #ebebeb;
