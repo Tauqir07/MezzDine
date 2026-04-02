@@ -500,28 +500,62 @@
   .rd-similar-price{ font-size: 11px; }
   .rd-similar-body { padding: 8px 10px; }
 }
+/* ── Contact row (same layout as kitchen) ── */
 .rd-contact-row {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
+/* ── WhatsApp button ── */
 .rd-whatsapp-btn {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 14px;
   background: #25D366;
-  color: white;
-  padding: 12px;
-  text-align: center;
-  border-radius: 8px;
-  text-decoration: none;
+  color: #fff;
+  font-size: 13px;
   font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
 }
 
+.rd-whatsapp-btn:hover {
+  background: #1ebe5d;
+  transform: translateY(-1px);
+}
+
+/* Disabled WhatsApp */
 .rd-whatsapp-btn--disabled {
-  background: #ccc;
+  background: #cbd5e1;
   cursor: not-allowed;
 }
 
+/* ── Chat button (same as kd-chat-btn) ── */
 .rd-contact-btn {
-  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 14px;
+  background: transparent;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.rd-contact-btn:hover {
+  border-color: #94a3b8;
+  color: #1e293b;
+  background: #f8fafc;
 }
