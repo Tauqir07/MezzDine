@@ -36,8 +36,12 @@ export const roomValidator = [
 
   body("amenities")
     .optional()
-    .isArray()
-    .withMessage("Amenities must be an array"),
+    .customSanitizer(value => {
+      if (typeof value === "string") {
+        try { return JSON.parse(value); } catch { return []; }
+      }
+      return value;
+    }),
 
   body("amenities.*")
     .optional()
@@ -51,7 +55,7 @@ export const roomValidator = [
 
   body("hostLanguage")
     .optional()
-    .isIn(["English", "Hindi", "Urdu","odia","bengali"])
+    .isIn(["English", "Hindi", "Urdu", "Odia", "Bengali"])
     .withMessage("Invalid host language"),
 
   body("isAvailable")
