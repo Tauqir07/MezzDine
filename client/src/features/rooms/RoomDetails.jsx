@@ -88,8 +88,8 @@ export default function RoomDetails() {
 
   async function submitReview() {
     try {
-      await api.post(`/reviews/${id}`, { rating: Number(rating), comment });
-      const res = await api.get(`/reviews/${id}`);
+      await api.post(`/reviews/${roomId}`, { rating: Number(rating), comment });
+      const res = await api.get(`/reviews/${roomId}`);
       setReviews(res.data.data || []);
       setComment("");
     } catch {
