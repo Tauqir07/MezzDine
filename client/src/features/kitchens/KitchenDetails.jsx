@@ -309,9 +309,6 @@ const message = `Hi ${kitchen.kitchenName}! I found you on MeZzDiNe https://mezz
         <div className="kd-header">
           <h1 className="kd-title">{kitchen.kitchenName}</h1>
           <p className="kd-address">📍 {kitchen.address}</p>
-          {kitchen.description && (
-           <p className="kd-description">{kitchen.description}</p>
-         )}
           <div className="kd-meta">
             {average > 0 && (
               <span className="kd-meta-item">
@@ -325,6 +322,12 @@ const message = `Hi ${kitchen.kitchenName}! I found you on MeZzDiNe https://mezz
             </span>
           </div>
         </div>
+        {kitchen.description && (
+        <div className="kd-about">
+        <h3 className="kd-about-title">🍽 About this Kitchen</h3>
+        <p className="kd-about-text">{kitchen.description}</p>
+       </div>
+       )}
 
         {/* ── Gallery ── */}
         {kitchen.images?.length > 0 && (

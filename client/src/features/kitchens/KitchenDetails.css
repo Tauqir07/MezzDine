@@ -770,3 +770,26 @@
   color: #1e293b;
   background: #f8fafc;
 }
+.kd-about {
+  background: #fdf8f4;
+  border-left: 4px solid #c2692a;
+  border-radius: 0 12px 12px 0;
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+}
+
+.kd-about-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #c2692a;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kd-about-text {
+  font-size: 14.5px;
+  color: #4a3f35;
+  line-height: 1.7;
+  margin: 0;
+}
