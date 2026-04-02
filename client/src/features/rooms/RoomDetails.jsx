@@ -46,7 +46,7 @@ function parseAmenities(raw) {
 
 export default function RoomDetails() {
 
-  const { roomId } = useParams();
+  const { id: roomId } = useParams(); // ✅ CORRECT
   const navigate     = useNavigate();
   const { user }     = useAuth();
 
@@ -57,7 +57,7 @@ export default function RoomDetails() {
   const [rating, setRating]           = useState(5);
   const [similar, setSimilar]         = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
-
+console.log("ROOM ID:", roomId);
   useEffect(() => {
   if (!roomId) return;
    setLoading(true);
