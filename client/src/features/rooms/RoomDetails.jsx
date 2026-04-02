@@ -7,7 +7,7 @@ import { startConversation } from "../../api/chat";
 import PageLoader from "../../components/PageLoader";
 import { useAuth } from "../../context/authContext";
 import Kitchenmap from "../../map/Kitchenmap";
-console.log("roomId:", roomId);
+
 const AMENITY_ICONS = {
   wifi:            { icon: "📶", label: "WiFi"            },
   kitchen:         { icon: "🍳", label: "Kitchen"         },
