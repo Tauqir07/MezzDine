@@ -76,7 +76,7 @@ export const myRooms = asyncHandler(async (req, res) => {
 // GET SINGLE ROOM
 export const getSingleRoom = asyncHandler(async (req, res) => {
   const room = await Room.findById(req.params.roomId)
-    .populate("ownerId", "name email");
+    .populate("ownerId", "name phone");
   if (!room) throw new AppError("Room not found", 404);
   res.json({ success: true, data: room });
 });
