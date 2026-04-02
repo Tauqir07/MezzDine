@@ -502,7 +502,7 @@
 }
 /* ── Contact row (same layout as kitchen) ── */
 /* ── Contact row: WhatsApp + Chat ── */
-.kd-contact-row {
+.rd-contact-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -510,7 +510,7 @@
 }
 
 /* WhatsApp button */
-.kd-whatsapp-btn {
+.rd-whatsapp-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -528,19 +528,19 @@
   cursor: pointer;
 }
 
-.kd-whatsapp-btn:hover {
+.rd-whatsapp-btn:hover {
   background: #1ebe5d;
   transform: translateY(-1px);
 }
 
-.kd-whatsapp-icon {
+.rd-whatsapp-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
 }
 
 /* Chat button */
-.kd-chat-btn {
+.rd-chat-btn {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -556,7 +556,7 @@
   transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
 
-.kd-chat-btn:hover {
+.rd-chat-btn:hover {
   border-color: #94a3b8;
   color: #1e293b;
   background: #f8fafc;
