@@ -46,7 +46,7 @@ function parseAmenities(raw) {
 
 export default function RoomDetails() {
 
-  const { roomId: id } = useParams();
+  const { roomId } = useParams();
   const navigate     = useNavigate();
   const { user }     = useAuth();
 
@@ -59,21 +59,29 @@ export default function RoomDetails() {
   const [chatLoading, setChatLoading] = useState(false);
 
   useEffect(() => {
+  if (!roomId) return;
+
+  api.get(`/rooms/${roomId}`)
+    .then(res => setRoom(res.data.data))
+    .catch(console.error)
+    .finally(() => setLoading(false));
+}, [roomId]);
+  useEffect(() => {
     setLoading(true);
-    api.get(`/rooms/${id}`)
+    api.get(`/rooms/${roomId}`)
       .then(res => setRoom(res.data.data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
-    api.get(`/reviews/${id}`)
+    api.get(`/reviews/${roomId}`)
       .then(res => setReviews(res.data.data || []))
       .catch(console.error);
   }, [id]);
 
   useEffect(() => {
-    api.get(`/rooms/similar/${id}`)
+    api.get(`/rooms/similar/${roomId}`)
       .then(res => setSimilar(res.data.data || []))
       .catch(console.error);
   }, [id]);
