@@ -476,3 +476,28 @@ display:block;
     height: 46px;
   }
 }
+.rd-contact-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.rd-whatsapp-btn {
+  flex: 1;
+  background: #25D366;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.rd-whatsapp-btn--disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.rd-contact-btn {
+  flex: 1;
+}

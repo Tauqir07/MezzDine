@@ -88,6 +88,21 @@ export default function RoomDetails() {
       alert("Failed to submit review");
     }
   }
+  async function getWhatsAppLink() {
+  const phone = room?.ownerId?.phone;
+  if (!phone) return null;
+
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 10) return null;
+
+  const e164 = digits.length === 10 ? `91${digits}` : digits;
+
+  const message = `Hi ${room?.title || "there"}!
+I found your listing on MeZzDiNe https://mezzdineapp.vercel.app/.
+I'm interested in this room. Please share more details.`;
+
+  return `https://api.whatsapp.com/send?phone=${e164}&text=${encodeURIComponent(message)}`;
+}
 
   async function contactOwner() {
     if (chatLoading || !room?.ownerId) return;
@@ -123,6 +138,8 @@ export default function RoomDetails() {
 
   const gender   = GENDER_CONFIG[room.genderPreference?.toLowerCase()] || GENDER_CONFIG["any"];
   const amenities = parseAmenities(room.amenities); // ← FIX: always an array
+  const whatsappLink = getWhatsAppLink();
+
 
   return (
     <div className="rd-page">
@@ -397,14 +414,35 @@ export default function RoomDetails() {
               )}
 
               {!isOwner && (
-                <button
-                  className="rd-contact-btn"
-                  onClick={contactOwner}
-                  disabled={chatLoading || !room.isAvailable}
-                >
-                  {chatLoading ? "Opening chat..." : "Contact Owner"}
-                </button>
-              )}
+  <div className="rd-contact-row">
+
+    {/* WhatsApp button */}
+    {whatsappLink ? (
+      <a
+        href={whatsappLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rd-whatsapp-btn"
+      >
+        💬 WhatsApp Owner
+      </a>
+    ) : (
+      <button disabled className="rd-whatsapp-btn rd-whatsapp-btn--disabled">
+        WhatsApp not available
+      </button>
+    )}
+
+    {/* Chat button */}
+    <button
+      className="rd-contact-btn"
+      onClick={contactOwner}
+      disabled={chatLoading || !room.isAvailable}
+    >
+      {chatLoading ? "Opening chat..." : "Chat"}
+    </button>
+
+  </div>
+)}
 
               <p className="rd-card-note">
                 Monthly rental only — no weekend stays
