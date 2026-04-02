@@ -17,7 +17,11 @@ export const createRoom = asyncHandler(async (req, res) => {
   const bedrooms  = req.body.bedrooms  ? Number(req.body.bedrooms)  : 0;
   const bathrooms = req.body.bathrooms ? Number(req.body.bathrooms) : 0;
   const beds      = req.body.beds      ? Number(req.body.beds)      : 0;
-  const amenities = req.body.amenities ? JSON.parse(req.body.amenities) : [];
+  const amenities = req.body.amenities
+  ? (typeof req.body.amenities === "string"
+      ? (() => { try { return JSON.parse(req.body.amenities); } catch { return req.body.amenities.split(","); } })()
+      : req.body.amenities)
+  : [];
 
   if (!title || !price || !address)
     throw new AppError("Title, price and address required", 400);
