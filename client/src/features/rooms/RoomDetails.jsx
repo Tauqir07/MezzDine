@@ -7,7 +7,7 @@ import { startConversation } from "../../api/chat";
 import PageLoader from "../../components/PageLoader";
 import { useAuth } from "../../context/authContext";
 import Kitchenmap from "../../map/Kitchenmap";
-
+console.log("roomId:", roomId);
 const AMENITY_ICONS = {
   wifi:            { icon: "📶", label: "WiFi"            },
   kitchen:         { icon: "🍳", label: "Kitchen"         },
@@ -128,6 +128,9 @@ I'm interested in this room. Please share more details.`;
       setChatLoading(false);
     }
   }
+  if (!roomId) {
+  return <p>Invalid room ID</p>;
+}
 
   if (loading) return <PageLoader />;
   if (!room)   return <p>Room not found</p>;
