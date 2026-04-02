@@ -95,7 +95,7 @@ function App() {
           path="/rooms/edit/:roomId"
           element={<ProtectedRoute role="roomProvider"><EditRoom /></ProtectedRoute>}
         />
-        <Route path="/rooms/:roomId" element={<RoomDetails />} />
+        <Route path="/rooms/:id" element={<RoomDetails />} />
 
         {/* ── KITCHENS — specific before /:id ── */}
         <Route path="/kitchens" element={<AvailableKitchens />} />
