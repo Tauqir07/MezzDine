@@ -3,6 +3,7 @@ import asyncHandler   from "../utils/asyncHandler.js";
 import AppError       from "../utils/AppError.js";
 import cloudinary     from "../config/cloudinary.js";
 import { geocodeAddress } from "../utils/geocode.js"; // ← ADD THIS
+import mongoose from "mongoose";
 
 
 // CREATE ROOM
@@ -75,21 +76,34 @@ export const myRooms = asyncHandler(async (req, res) => {
 
 // GET SINGLE ROOM
 export const getSingleRoom = asyncHandler(async (req, res) => {
-  const room = await Room.findById(req.params.roomId)
+  const { roomId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(roomId)) {
+    throw new AppError("Invalid room ID", 400);
+  }
+
+  const room = await Room.findById(roomId)
     .populate("ownerId", "name phone");
+
   if (!room) throw new AppError("Room not found", 404);
+
   res.json({ success: true, data: room });
 });
 
 
 // GET SIMILAR ROOMS
 export const getSimilarRooms = asyncHandler(async (req, res) => {
-  const room = await Room.findById(req.params.roomId);
+  const { roomId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(roomId)) {
+    throw new AppError("Invalid room ID", 400);
+  }
+
+  const room = await Room.findById(roomId);
   if (!room) throw new AppError("Room not found", 404);
 
-  // similar by propertyType or genderPreference instead of location string
   const similar = await Room.find({
-    _id:          { $ne: room._id },
+    _id: { $ne: room._id },
     propertyType: room.propertyType,
   })
     .populate("ownerId", "name")
