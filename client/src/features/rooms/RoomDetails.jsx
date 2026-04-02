@@ -72,19 +72,19 @@ export default function RoomDetails() {
       .then(res => setRoom(res.data.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [roomId]);
 
   useEffect(() => {
     api.get(`/reviews/${roomId}`)
       .then(res => setReviews(res.data.data || []))
       .catch(console.error);
-  }, [id]);
+  }, [roomId]);
 
   useEffect(() => {
     api.get(`/rooms/similar/${roomId}`)
       .then(res => setSimilar(res.data.data || []))
       .catch(console.error);
-  }, [id]);
+  }, [roomId]);
 
   async function submitReview() {
     try {
