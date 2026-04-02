@@ -500,64 +500,78 @@
   .rd-similar-price{ font-size: 11px; }
   .rd-similar-body { padding: 8px 10px; }
 }
-/* ── Contact row (same layout as kitchen) ── */
 /* ── Contact row: WhatsApp + Chat ── */
 .rd-contact-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-/* WhatsApp button */
+/* ── WhatsApp button (UPGRADED LIKE IMAGE) ── */
 .rd-whatsapp-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex: 1;
   justify-content: center;
-  padding: 11px 16px;
+  gap: 10px;
+
+  flex: 1;
+
+  padding: 12px 18px;
   background: #25d366;
   color: #fff;
-  font-size: 14px;
+
+  font-size: 15px;
   font-weight: 600;
-  border-radius: 10px;
+
+  border-radius: 14px;
   text-decoration: none;
-  transition: background 0.2s, transform 0.15s;
+
   border: none;
   cursor: pointer;
+
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.25);
+
+  transition: transform 0.15s ease, background 0.2s ease;
 }
 
 .rd-whatsapp-btn:hover {
-  background: #1ebe5d;
+  background: #20c05c;
   transform: translateY(-1px);
 }
 
+/* WhatsApp icon */
 .rd-whatsapp-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 
-/* Chat button */
+/* ── Chat button (CLEANER like image) ── */
 .rd-chat-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 11px 14px;
+
+  padding: 10px 14px;
+
   background: transparent;
-  color: #64748b;
-  font-size: 13px;
+  color: #6b7280;
+
+  font-size: 14px;
   font-weight: 500;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
   cursor: pointer;
   white-space: nowrap;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+
+  transition: 0.2s ease;
 }
 
 .rd-chat-btn:hover {
-  border-color: #94a3b8;
-  color: #1e293b;
-  background: #f8fafc;
+  background: #f3f4f6;
+  color: #111827;
+  border-color: #d1d5db;
 }
