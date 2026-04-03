@@ -1,4 +1,4 @@
-# 🍱 HomeBase
+# MeZzDiNe
 
 > A home kitchen subscription and room finder platform connecting home cooks with corporate employees and students seeking affordable meals and accommodation.
 
