@@ -57,7 +57,7 @@ export default function RoomDetails() {
   const [rating, setRating]           = useState(5);
   const [similar, setSimilar]         = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
-console.log("ROOM ID:", roomId);
+
   useEffect(() => {
   if (!roomId) return;
    setLoading(true);
@@ -101,7 +101,7 @@ console.log("ROOM ID:", roomId);
 
   const e164 = digits.length === 10 ? `91${digits}` : digits;
 
-  const message = `Hi ${room?.title || "there"}!
+  const message = `Hi ${room?.ownerId?.name || "there"}!
 I found your listing on MeZzDiNe https://mezzdineapp.vercel.app/.
 I'm interested in this room. Please share more details.`;
 
