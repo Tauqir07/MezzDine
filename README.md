@@ -1,44 +1,67 @@
-A home kitchen subscription and room finder platform that connects home cooks with people looking for affordable, home-cooked daily meals and a roof above their head this project is designed solely for the coorporate employee and student who are in a need of these basic life necessaties 
+# 🍱 HomeBase
+
+> A home kitchen subscription and room finder platform connecting home cooks with corporate employees and students seeking affordable meals and accommodation.
+
+## About
+
+MeZzDiNe bridges the gap between home cooks and people who need affordable, home-cooked daily meals — along with a place to stay. Designed specifically for corporate employees and students navigating new cities.
+
+## Features
+
+### 🍽️ Kitchen Subscriptions
+- Browse nearby kitchens with photos, pricing, and weekly menus
+- Flexible meal plans — 1, 2, or 3 meals/day
+- UPI payments with screenshot upload
+- Reviews, notifications & similar kitchen suggestions
+
+###  Room Listings
+- Filter by Male / Female / Family
+- Browse photos and room details
+- Interactive map to find nearby rooms
+- Contact owners via in-app chat or WhatsApp
+
+###  Chat & Notifications
+- Real-time messaging via Socket.io
+- WhatsApp deep-link with pre-filled messages
+- Alerts for payments, subscriptions, and messages
+
+###  Maps & Location
+- Interactive map for kitchens and rooms
+- Auto-geocoding of addresses
+- Delivery location tracking for subscribers
+
+### For Kitchen Owners
+- Create listings with photos and weekly menus
+- Approve/reject payments, manage subscribers
+- Dashboard with subscriber overview and delivery map
+
+###  General
+- Role-based auth: subscriber / kitchen owner / room owner
+- Similar listing suggestions on detail pages
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React / Next.js |
+| Backend | Node.js + Express |
+| Database | MongoDB |
+| Real-time | Socket.io |
+| Maps | Leaflet.js |
+| Payments | UPI (manual approval) |
+
+## Getting Started
+
+```bash
+## Running Locally
+cd client && npm run dev
+cd server && npm run dev
+```
 
 
-FEATURES
-Kitchen Subscriptions
-Browse nearby home kitchens with photos, pricing, and weekly menus
-Choose from flexible meal plans — 1, 2, or 3 meals per day
-Pay advance directly via UPI with screenshot upload
-Leave and edit reviews for kitchens
-Get notified when your payment is approved
-View similar kitchens nearby
 
-Room Listings
- Filter rooms by category — Male, Female, or Family
- Browse room photos and details before reaching out
- Find rooms near you using the interactive map
- Contact room owners directly via in-app chat or WhatsApp
- Map view to locate and compare available rooms nearby
+## Contributing
 
- Chat & Communication
-Real-time in-app messaging between users and owners (Socket.io)
-WhatsApp deep-link for quick contact with a pre-filled message
-Notification system for new subscriptions, payments, and messages
+Pull requests are welcome. For major changes, please open an issue first.
 
-Maps & Location
-Interactive map to explore kitchens and rooms near you
-Auto-geocoding of addresses to place accurate pins
-Delivery location tracking for kitchen subscribers
-
-For Kitchen Owners
-Create and manage your kitchen listing with photos
-Set a weekly menu with breakfast, lunch, and dinner per day
-Track active subscribers and manage meal plans
-Approve or reject incoming advance payments
-Dashboard with subscriber overview and delivery map
-Real-time notifications for new subscriptions and payments
-Edit kitchen details, pricing, and UPI ID anytime
-Map to view and locate the subscribers delivery location
-
-General
- Role-based authentication (subscriber / kitchen owner / room owner)
- Similar listing suggestions on each detail page
-
-
+© 2026 [Toukir Akhtar]. All rights reserved.
