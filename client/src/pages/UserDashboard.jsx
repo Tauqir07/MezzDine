@@ -402,9 +402,10 @@ export default function UserDashboard() {
                 {[
                   { key: "breakfast", label: "Breakfast", icon: "🌅",
                     show: sub.mealPlan === "three" },
-                  { key: "lunch",     label: "Lunch",     icon: "☀️",  show: true },
-                  { key: "dinner",    label: "Dinner",    icon: "🌙",
-                    show: sub.mealPlan === "three" },
+                  { key: "lunch", label: "Lunch", icon: "☀️",
+       show: sub.mealPlan === "three" || sub.mealPlan === "two" || (sub.mealPlan === "one" && sub.preferredMeal === "lunch") },
+                  { key: "dinner", label: "Dinner", icon: "🌙",
+       show: sub.mealPlan === "three" || sub.mealPlan === "two" || (sub.mealPlan === "one" && sub.preferredMeal === "dinner") },
                 ].filter(m => m.show && todayMeals[m.key]).map(m => (
                   <div key={m.key} className="ud-meal-card">
                     {todayMeals[m.key]?.image?.url
