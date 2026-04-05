@@ -401,7 +401,7 @@ export default function UserDashboard() {
               <div className="ud-meals-row">
                 {[
                   { key: "breakfast", label: "Breakfast", icon: "🌅",
-                    show: sub.mealPlan === "three" || sub.mealPlan === "two" },
+                    show: sub.mealPlan === "three" },
                   { key: "lunch",     label: "Lunch",     icon: "☀️",  show: true },
                   { key: "dinner",    label: "Dinner",    icon: "🌙",
                     show: sub.mealPlan === "three" },
