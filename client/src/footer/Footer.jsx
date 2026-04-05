@@ -69,7 +69,7 @@ export default function Footer() {
           <h4 className="footer-col-title">Contact</h4>
           <ul className="footer-links footer-links--contact">
             <li>
-              <a href="mailto:tauqirakhtar07@gmail.com">
+              <a href="mailto:mezzdine922@gmail.com">
                 <span className="footer-contact-icon">✉️</span>
                 mezzdine922@gmail.com
               </a>

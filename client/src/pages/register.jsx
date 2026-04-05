@@ -6,141 +6,100 @@ import "./register.css";
 function Register() {
   const navigate = useNavigate();
 
-  // form fields
   const [name,     setName]     = useState("");
   const [email,    setEmail]    = useState("");
   const [phone,    setPhone]    = useState("");
   const [password, setPassword] = useState("");
   const [role,     setRole]     = useState("");
 
-  // password visibility
   const [showPassword, setShowPassword] = useState(false);
 
-  // ui
   const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
 
-  // OTP flow state (commented out — uncomment when ready)
-  // const [step,     setStep]     = useState("form"); // "form" | "otp"
-  // const [otp,      setOtp]      = useState(["", "", "", "", "", ""]);
-  // const [otpToken, setOtpToken] = useState("");
-  // const [resending, setResending] = useState(false);
+  const [step,      setStep]      = useState("form");
+  const [otp,       setOtp]       = useState(["", "", "", "", "", ""]);
+  const [otpToken,  setOtpToken]  = useState("");
+  const [resending, setResending] = useState(false);
 
-  // ── Submit form → register directly ───────────────────────────────────────
-
-  const handleSubmit = async (e) => {
+  const handleSubmitSendOtp = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!/^\d{10}$/.test(phone.trim())) {
       setError("Enter a valid 10-digit phone number");
       return;
     }
-
     setLoading(true);
     try {
-      const res = await api.post("/auth/register", {
-        name,
-        email,
-        phone: phone.trim(),
-        password,
-        role,
+      const res = await api.post("/auth/register/send-otp", {
+        name, email, phone: phone.trim(), password, role,
       });
-
-      if (res.data.success) {
-        navigate("/login");
-      }
-
+      setOtpToken(res.data.otpToken);
+      setStep("otp");
     } catch (err) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ── OTP flow handlers (commented out — uncomment when ready) ───────────────
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    const otpValue = otp.join("");
+    if (otpValue.length < 6) { setError("Please enter the full 6-digit code"); return; }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await api.post("/auth/register/verify-otp", {
+        email, otp: otpValue, otpToken,
+      });
+      if (res.data.success) navigate("/login");
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid OTP. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // const handleSubmitSendOtp = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
-  //   if (!/^\d{10}$/.test(phone.trim())) {
-  //     setError("Enter a valid 10-digit phone number");
-  //     return;
-  //   }
-  //   setLoading(true);
-  //   try {
-  //     const res = await api.post("/auth/register/send-otp", {
-  //       name, email, phone: phone.trim(), password, role,
-  //     });
-  //     setOtpToken(res.data.otpToken);
-  //     setStep("otp");
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Failed to send OTP. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleResend = async () => {
+    setResending(true);
+    setError("");
+    try {
+      const res = await api.post("/auth/register/resend-otp", { otpToken });
+      setOtpToken(res.data.otpToken);
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not resend OTP. Please try again.");
+    } finally {
+      setResending(false);
+    }
+  };
 
-  // const handleVerifyOtp = async (e) => {
-  //   e.preventDefault();
-  //   const otpValue = otp.join("");
-  //   if (otpValue.length < 6) { setError("Please enter the full 6-digit code"); return; }
-  //   setError("");
-  //   setLoading(true);
-  //   try {
-  //     const res = await api.post("/auth/register/verify-otp", {
-  //       email, otp: otpValue, otpToken,
-  //     });
-  //     if (res.data.success) navigate("/login");
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Invalid OTP. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  const handleOtpChange = (index, value) => {
+    if (!/^\d*$/.test(value)) return;
+    const next = [...otp];
+    next[index] = value.slice(-1);
+    setOtp(next);
+    if (value && index < 5) document.getElementById(`otp-${index + 1}`)?.focus();
+  };
 
-  // const handleResend = async () => {
-  //   setResending(true);
-  //   setError("");
-  //   try {
-  //     const res = await api.post("/auth/register/resend-otp", { otpToken });
-  //     setOtpToken(res.data.otpToken);
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Could not resend OTP. Please try again.");
-  //   } finally {
-  //     setResending(false);
-  //   }
-  // };
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      document.getElementById(`otp-${index - 1}`)?.focus();
+    }
+  };
 
-  // const handleOtpChange = (index, value) => {
-  //   if (!/^\d*$/.test(value)) return;
-  //   const next = [...otp];
-  //   next[index] = value.slice(-1);
-  //   setOtp(next);
-  //   if (value && index < 5) document.getElementById(`otp-${index + 1}`)?.focus();
-  // };
-
-  // const handleOtpKeyDown = (index, e) => {
-  //   if (e.key === "Backspace" && !otp[index] && index > 0) {
-  //     document.getElementById(`otp-${index - 1}`)?.focus();
-  //   }
-  // };
-
-  // const handleOtpPaste = (e) => {
-  //   const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-  //   if (pasted.length === 6) {
-  //     setOtp(pasted.split(""));
-  //     document.getElementById("otp-5")?.focus();
-  //   }
-  //   e.preventDefault();
-  // };
-
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const handleOtpPaste = (e) => {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 6) {
+      setOtp(pasted.split(""));
+      document.getElementById("otp-5")?.focus();
+    }
+    e.preventDefault();
+  };
 
   return (
     <div className="rg-wrapper">
 
-      {/* Left decorative panel */}
       <div className="rg-panel">
         <div className="rg-panel__inner">
           <div className="rg-panel__logo">🏠</div>
@@ -156,110 +115,111 @@ function Register() {
         </div>
       </div>
 
-      {/* Right form side */}
       <div className="rg-form-side">
         <div className="rg-card">
 
-          {/* ── Registration form ── */}
-          <div className="rg-card__header">
-            <h2 className="rg-card__title">Create account</h2>
-            <p className="rg-card__sub">Fill in your details to get started.</p>
-          </div>
-
-          {error && <div className="rg-error"><span>⚠</span> {error}</div>}
-
-          <form onSubmit={handleSubmit} className="rg-form">
-
-            <div className="rg-field">
-              <label htmlFor="rg-name">Full Name</label>
-              <input
-                id="rg-name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="rg-field">
-              <label htmlFor="rg-email">Email address</label>
-              <input
-                id="rg-email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="rg-field">
-              <label htmlFor="rg-phone">Phone number</label>
-              <input
-                id="rg-phone"
-                type="tel"
-                placeholder="10-digit mobile number"
-                value={phone}
-                onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                required
-              />
-            </div>
-
-            <div className="rg-field">
-              <label htmlFor="rg-password">Password</label>
-              <div className="rg-password-wrap">
-                <input
-                  id="rg-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Create a password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  required
-                />
-                <button
-                  type="button"
-                  className="rg-eye-btn"
-                  onClick={() => setShowPassword(v => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? "🙈" : "👁"}
-                </button>
+          {step === "form" && (
+            <>
+              <div className="rg-card__header">
+                <h2 className="rg-card__title">Create account</h2>
+                <p className="rg-card__sub">Fill in your details to get started.</p>
               </div>
-            </div>
 
-            <div className="rg-field">
-              <label htmlFor="rg-role">I am a…</label>
-              <select
-                id="rg-role"
-                value={role}
-                onChange={e => setRole(e.target.value)}
-                required
-                className={role ? "rg-select--filled" : ""}
-              >
-                <option value="">Select role</option>
-                <option value="user">Normal User</option>
-                <option value="roomProvider">Room Provider</option>
-                <option value="kitchenOwner">Kitchen Owner</option>
-              </select>
-            </div>
+              {error && <div className="rg-error"><span>⚠</span> {error}</div>}
 
-            <button
-              type="submit"
-              className={`rg-btn${loading ? " rg-btn--loading" : ""}`}
-              disabled={loading}
-            >
-              {loading ? <span className="rg-spinner" /> : "Create Account"}
-            </button>
+              <form onSubmit={handleSubmitSendOtp} className="rg-form">
 
-          </form>
+                <div className="rg-field">
+                  <label htmlFor="rg-name">Full Name</label>
+                  <input
+                    id="rg-name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    required
+                  />
+                </div>
 
-          <p className="rg-switch">
-            Already have an account? <Link to="/login">Sign in</Link>
-          </p>
+                <div className="rg-field">
+                  <label htmlFor="rg-email">Email address</label>
+                  <input
+                    id="rg-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
 
-          {/* OTP verification step (commented out — uncomment when ready) */}
-          {/* {step === "otp" && (
+                <div className="rg-field">
+                  <label htmlFor="rg-phone">Phone number</label>
+                  <input
+                    id="rg-phone"
+                    type="tel"
+                    placeholder="10-digit mobile number"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                    required
+                  />
+                </div>
+
+                <div className="rg-field">
+                  <label htmlFor="rg-password">Password</label>
+                  <div className="rg-password-wrap">
+                    <input
+                      id="rg-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a password"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="rg-eye-btn"
+                      onClick={() => setShowPassword(v => !v)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? "🙈" : "👁"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rg-field">
+                  <label htmlFor="rg-role">I am a…</label>
+                  <select
+                    id="rg-role"
+                    value={role}
+                    onChange={e => setRole(e.target.value)}
+                    required
+                    className={role ? "rg-select--filled" : ""}
+                  >
+                    <option value="">Select role</option>
+                    <option value="user">Normal User</option>
+                    <option value="roomProvider">Room Provider</option>
+                    <option value="kitchenOwner">Kitchen Owner</option>
+                  </select>
+                </div>
+
+                <button
+                  type="submit"
+                  className={`rg-btn${loading ? " rg-btn--loading" : ""}`}
+                  disabled={loading}
+                >
+                  {loading ? <span className="rg-spinner" /> : "Create Account"}
+                </button>
+
+              </form>
+
+              <p className="rg-switch">
+                Already have an account? <Link to="/login">Sign in</Link>
+              </p>
+            </>
+          )}
+
+          {step === "otp" && (
             <>
               <button
                 className="rg-back-btn"
@@ -320,7 +280,7 @@ function Register() {
                 </button>
               </p>
             </>
-          )} */}
+          )}
 
         </div>
       </div>
